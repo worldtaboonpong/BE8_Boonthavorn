@@ -1,0 +1,64 @@
+<aura:component access="global" controller="QuotationPrepController">
+
+	<aura:attribute name="eachOtherDeposit" type="Object" default="{}"/>
+	<aura:attribute name="OtherDepositIndex" type="String"/>
+	<aura:attribute name="expenseDepositTypeOption" type="List" default="[]"/>
+	<aura:attribute name="totalInstallment" type="Decimal" default="0" />
+	<aura:attribute name="isChangeDeposit" type="Boolean" default="false" />
+	<aura:attribute name="isReadOnly" type="Boolean" default="false" />
+	<aura:attribute name="isEditPaymentDueDate" type="Boolean" default="false" />
+	<aura:attribute name="oppObject" type="Object" default="{}"/>
+	
+	<aura:registerEvent name="otherDepositObjectEvent" type="c:OtherDepositInstalmentEvent"/>
+	
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+		<div class="slds-col slds-size_2-of-3">
+			<table class="slds-m-vertical_xx-small">
+				<tr>
+					<td><p class="slds-m-vertical_xx-small">Type</p></td>
+					<td>
+						<lightning:select class="slds-size_2-of-3 label-hidden" name="" label=""  value="{!v.eachOtherDeposit.Type}" onchange="{!c.handleChangeOtherDepositObject}" disabled = "{!v.isReadOnly}">
+					        <aura:iteration items="{!v.expenseDepositTypeOption}" var="option">
+					            <option text="{!option.label}" value="{!option.value}"/>
+					        </aura:iteration>
+					    </lightning:select>
+					</td>
+				</tr>
+				<tr>
+					<td><p class="slds-m-vertical_xx-small">Total Amount (Baht)</p></td>
+					<td>
+						<lightning:input class="slds-m-vertical_xx-small slds-size_2-of-3 priceInput" type="number" name="" label="" value="{!v.eachOtherDeposit.TotalAmount}" step=".01" 
+						onchange="{!c.changeTotalPriceHandler}" 
+						onblur="{!c.handleChangeOtherDepositObject}"
+						disabled = "{!v.isReadOnly}" />
+					</td>
+				</tr>
+				<tr>
+					<td><p class="slds-m-vertical_xx-small">Number of Installments</p></td>
+					<td>
+						<div class="slds-grid slds-gutters ">
+	                        <div class="slds-col slds-size_1-of-2">
+								<lightning:input class="slds-m-vertical_xx-small slds-size_2-of-3" type="number" name="" label="" value="{!v.eachOtherDeposit.NumberOfInstallment}" step="1" disabled = "true"/>
+	                        </div>
+	                        <div class="slds-col slds-size_1-of-2">
+	                        	<aura:if isTrue="{!not(v.isReadOnly)}">
+		            		     	<lightning:button class="slds-m-top_x-large" variant="brand" label="Add Installment" title="Add Installment" onclick="{!c.addINstallment}" disabled = "{!v.isReadOnly}"/>
+	                        	</aura:if>
+	                        </div>
+
+	                    </div>
+					</td>
+				</tr>
+				<tr>
+					<td><p class="slds-m-vertical_xx-small">Remark</p></td>
+					<td>
+						<lightning:textarea name="remarkInput" label="" value="{!v.eachOtherDeposit.Remark}" onblur="{!c.handleChangeOtherDepositObject}" disabled = "{!v.isReadOnly}"/>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+	<c:InstallmentTable installmentList="{!v.eachOtherDeposit.InstallmentList}" totalInstallment="{!v.eachOtherDeposit.TotalInstallment}" NumberOfInstallment="{!v.eachOtherDeposit.NumberOfInstallment}" TotalPrice="{!v.eachOtherDeposit.TotalAmount}" isChangeDeposit="{!v.isChangeDeposit}" isReadOnly="{!v.isReadOnly}" isEditPaymentDueDate="{!v.isEditPaymentDueDate}" oppObject="{!v.oppObject}"/>
+
+</aura:component>

@@ -1,0 +1,60 @@
+<aura:component access="global" controller="QuotationPrepController">
+
+	<aura:attribute name="expenseList" type="List" default="[]"/>
+	<aura:attribute name="expenseDepositTypeOption" type="List" default="[]"/>
+	<aura:attribute name="isChangeExpense" type="Boolean" default="false" />
+	<aura:attribute name="isReadOnly" type="Boolean" default="false" />
+	<aura:attribute name="oppObject" type="Object" default="{}"/>
+	<aura:attribute name="selectedRoom" type="List" />
+
+	<aura:handler name="expenseObjectEvent" event="c:ExpenseInstallmentEvent" action="{!c.handleComponentEvent}"/>
+	<aura:handler name="expenseObjectTypeEvent" event="c:ExpenseInstallmentEvent" action="{!c.handleExpenseTypeEvent}"/>
+	<aura:handler name="expenseObjectInstallmentEvent" event="c:ExpenseInstallmentEvent" action="{!c.handleExpenseInstallmentEvent}"/>
+	<aura:handler name="expenseObjectLeaseFloorEvent" event="c:ExpenseInstallmentEvent" action="{!c.handleExpenseLeaseHoldFloorEvent}"/>
+	<aura:handler name="leaseHoldInstallmentEvent" event="c:InstallmentBoxEvent" action="{!c.handleInstallmentBoxEvent}"/>
+	<aura:handler name="leaseHoldInstallmentAmountEvent" event="c:InstallmentBoxEvent" action="{!c.handleInstallmentAmountEvent}"/>
+	<aura:attribute name="isEditPaymentDueDate" type="Boolean" default="false" />
+	<aura:attribute name="isConfirmRemove" type="Boolean" default="false"/>
+
+	<lightning:overlayLibrary aura:id="confirmOverlay"/>
+
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small slds-box slds-box_x-small slds-theme_shade">
+		<div class="slds-col slds-size_1-of-2">
+				<h1 class="slds-text-heading_medium">Other</h1>
+		</div>
+		<aura:if isTrue="{!not(v.isReadOnly)}">
+			<div class="slds-col slds-size_1-of-2">
+				<lightning:button class="slds-float_right" variant="brand" label="Add Other Expense" title="Add Other Expense" onclick="{!c.addExpense}" disabled="{!v.isReadOnly}"/>
+			</div>
+		</aura:if>
+	</div>
+
+	<p>
+		<lightning:icon iconName="utility:info" alternativeText="Utility info" title="info" size="x-small"/>
+		ตาราง Other และ Installment จะเป็นการกรอกค่าที่ยังไม่รวม VAT
+	</p>
+
+	<div class="slds-m-top_small slds-is-expanded" style="height:auto !important;">
+
+		<aura:iteration items="{!v.expenseList}" var="eachExpense" indexVar="expenseIndex">
+			<aura:if isTrue="{!!eachExpense.isToDeleteRecord}">
+			    <div class="slds-box slds-is-expanded slds-m-bottom_small">
+			    	<aura:if isTrue="{!!eachExpense.isLEASEHOLDSUMMARY}">
+				    	<div class="slds-clearfix">
+		                    <div class="slds-float_right">
+		                    	<aura:if isTrue="{!not(v.isReadOnly)}">
+			                        <a onclick="{!c.removePeriod}" name="{!expenseIndex}">
+			                            <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_small" size="small" alternativeText="Delete Expense"/>
+			                            <span class="slds-assistive-text">Delete Icon</span>
+			                        </a>
+		                    	</aura:if>
+		                    </div>
+		                </div>
+			    	</aura:if>
+			    	<c:ExpenseBoxComponent eachExpense="{!eachExpense}" expenseIndex="{!expenseIndex}" expenseDepositTypeOption="{!v.expenseDepositTypeOption}" isChangeExpense="{!v.isChangeExpense}" isReadOnly="{!v.isReadOnly}" isEditPaymentDueDate="{!v.isEditPaymentDueDate}" isLeaseHold="{!eachExpense.isLEASEHOLD}" oppObject="{!v.oppObject}"/>
+			    </div>
+			</aura:if>
+		</aura:iteration>
+	</div>
+
+</aura:component>

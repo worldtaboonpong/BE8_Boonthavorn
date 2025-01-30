@@ -1,0 +1,25 @@
+.THIS table.installmentTable {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .THIS td.installmentTable{
+    border: 2px solid #666666;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  .THIS th.installmentTable{
+    border: 2px solid #666666;
+    background-color: #cccccc;
+    text-align: center;
+    padding: 8px;
+  }
+  
+  .THIS tr.installmentTable{
+    background-color: #f2f2f2;
+  }
+  .THIS .label-hidden > label {
+      display: none;
+  }

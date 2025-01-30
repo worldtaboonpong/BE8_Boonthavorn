@@ -1,0 +1,55 @@
+<template>
+    <lightning-quick-action-panel header="Edit">
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </template>    
+        <lightning-record-edit-form record-id={recordId} object-api-name={objectApiName} onload={handleOnLoad} onsubmit={handleSubmit}>
+            <lightning-layout multiple-rows>
+                <lightning-layout-item size="6" >
+                    <lightning-output-field field-name="Contact_ID__c"></lightning-output-field>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" >
+                    <lightning-input-field field-name="AccountId" required></lightning-input-field>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" >
+                    <lightning-input-field field-name="Salutation_TH__c" required></lightning-input-field>
+                </lightning-layout-item>
+                <!--<lightning-layout-item size="6" >
+                    <lightning-input-field field-name="Name" required></lightning-input-field>
+                </lightning-layout-item>-->
+                <lightning-layout-item size="6" >
+                    <lightning-input-field field-name="Department"></lightning-input-field>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" >
+                    <lightning-input label="Firstname" value={firstName} onchange={contactChangeVal} variant="label-inline"></lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" >
+                    <lightning-input-field field-name="Function__c"></lightning-input-field>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" >
+                    <lightning-input label="Lastname" value={lastName} onchange={contactChangeVal} variant="label-inline"></lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" >
+                    <lightning-input-field field-name="MobilePhone" required></lightning-input-field>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" >
+                    <lightning-input-field field-name="Email" required></lightning-input-field>
+                </lightning-layout-item>
+                <!--<lightning-layout-item size="6" >
+                    <lightning-input-field field-name="Street__c"></lightning-input-field>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" >
+                    <lightning-input-field field-name="Province__c"></lightning-input-field>
+                </lightning-layout-item>-->
+
+
+                <lightning-layout-item size="6" padding="around-small" >
+                    <lightning-button variant="neutral" class="slds-float_right" label="Cancel" onclick={handleClose}></lightning-button>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" padding="around-small" >
+                    <lightning-button variant="brand" class="slds-float_left" type="submit" label="Save"></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
+        </lightning-record-edit-form>
+    </lightning-quick-action-panel>
+</template>

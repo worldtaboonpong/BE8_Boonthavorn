@@ -1,0 +1,811 @@
+<apex:page standardController="Opportunity" extensions="OppPDFSubPageController" action="{!updatedData}" showHeader="false"
+    sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false">
+    <!-- Begin Default Content REMOVE THIS -->
+
+    <apex:variable value="{!1}" var="sequenceNumber" />
+    <apex:variable value="{!oppPeriodId.size-1}" var="lastValue" />
+    <apex:variable value="{!ContractFeePeriod_Space.periodList.size-1}" var="lastPeriodValue" />
+    <!-- <apex:variable value="{!CamFee.periodList[0]}" var="firstCamPeriod" />
+    <apex:variable value="{!CamFee.periodList[CamFee.periodList.size-1]}" var="lastCamPeriod" /> -->
+
+
+    <div class="spaceRental" width="100%">
+        <table class="spaceRentalTable" cellspacing="0">
+            <thead>
+                <tr>
+                    <td colspan="3" class="title">
+                        เงื่อนไขราคาค่าเช่าและค่าบริการ
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="1" width="10px" class="header-one">
+                        No.
+                    </td>
+                    <td colspan="1" class="header-two">รายการ </td>
+                    <td colspan="1" class="header-two">
+                        รายละเอียด
+                    </td>
+                </tr>
+            </thead>
+
+            <!-- Details -->
+
+            <!-- Fixed Type Contract -->
+            <apex:outputText rendered="{!IF(AND(calculationMethod != 'GP no Min',calculationMethod != 'GP with Min'),true,false)}">
+                <apex:outputText rendered="{!Opportunity.Rental_Type__c = 'Space_Rental'}">
+                    <tr>
+                        <td class="running-sequence">{!sequenceNumber}</td>
+                        <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                        <td class="item">ค่าเช่าพื้นที่ ปีที่ 1</td>
+                        <td class="itemFee"></td>
+                        <!-- <td class="itemUnit">บาทต่อตร.ม.ต่อเดือน เป็นเงิน {!Opportunity.Year_1_Monthly_Rental_for_Document__c} บาทต่อเดือน</td> -->
+                        <!-- <td class="totalText">เป็นเงิน</td> -->
+                        <!-- <td class="totalFee">{!Opportunity.Year_1_Monthly_Rental_for_Document__c}</td> -->
+                        <!-- <td class="totalUnit">บาทต่อเดือน</td> -->
+                    </tr>
+
+                    <apex:repeat value="{!ContractFeePeriod_Space.rentalUnit}" var="unit">
+                        <apex:outputText rendered="{!ContractFeePeriod_Space.unitIsFOC[unit]}">
+                            <tr>
+                                <td class="running-sequence"></td>
+                                <td class="item"> - Unit: {!unit}</td>
+                                <td class="itemFee"></td>
+                            </tr>
+                        </apex:outputText>
+                        <apex:outputText rendered="{!!ContractFeePeriod_Space.unitIsFOC[unit]}">
+                            <apex:variable value="{!ContractFeePeriod_Space.unitDataWithPeriod[unit][0]}" var="firstPeriod" />
+                            <!-- <apex:variable value="{!ContractFeePeriod_Space.unitDataWithPeriod[unit][lastPeriodValue]}" var="lastPeriod" /> -->
+                            <tr>
+                                <td class="running-sequence"></td>
+                                <!-- <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" /> -->
+                                <td class="item"> - Unit: {!unit}</td>
+
+                                <td class="itemFee">
+                                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                                        <apex:param value="{!ContractFeePeriod_Space.rentFeePerSQM[unit][firstPeriod]}" />
+                                    </apex:outputText> บาทต่อตร.ม.ต่อเดือน เป็นเงิน
+                                    <apex:outputText rendered="{!firstPeriod.MinType__c = 'Measurement'}" value="{0,number, ###,###,##0.00}">
+                                        <apex:param value="{!ContractFeePeriod_Space.leasableRentalMonth[unit][firstPeriod.Id]}" />
+                                    </apex:outputText>
+                                    <apex:outputText rendered="{!firstPeriod.MinType__c = 'Fixed'}" value="{0,number, ###,###,##0.00}">
+                                        <apex:param value="{!ContractFeePeriod_Space.fixedTotalRent[unit][firstPeriod.Id]}" />
+                                    </apex:outputText>
+                                    บาทต่อเดือน
+                                </td>
+                            </tr>
+                        </apex:outputText>
+                    </apex:repeat>
+                </apex:outputText>
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">ค่าบริการพื้นที่ ปีที่ 1</td>
+                    <td class="itemFee">
+                    </td>
+                </tr>
+
+                <apex:repeat value="{!ContractFeePeriod_Space.rentalUnit}" var="unit">
+                    <apex:outputText rendered="{!ContractFeePeriod_Space.unitIsFOC[unit]}">
+                        <tr>
+                            <td class="running-sequence"></td>
+                            <td class="item"> - Unit: {!unit}</td>
+                            <td class="itemFee"></td>
+                        </tr>
+                    </apex:outputText>
+                    <apex:outputText rendered="{!!ContractFeePeriod_Space.unitIsFOC[unit]}">
+                        <apex:variable value="{!ContractFeePeriod_Space.unitDataWithPeriod[unit][0]}" var="firstPeriod" />
+                        <tr>
+                            <td class="running-sequence"></td>
+                            <!-- <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" /> -->
+                            <td class="item"> - Unit: {!unit}</td>
+                            <td class="itemFee">
+                                <apex:outputText value="{0,number, ###,###,##0.00}">
+                                    <apex:param value="{!ContractFeePeriod_Space.serviceFeePerSQM[unit][firstPeriod]}" />
+                                </apex:outputText> บาทต่อตร.ม.ต่อเดือน เป็นเงิน
+                                <apex:outputText rendered="{!firstPeriod.MinType__c = 'Measurement'}" value="{0,number, ###,###,##0.00}">
+                                    <apex:param value="{!ContractFeePeriod_Space.leasableServiceMonth[unit][firstPeriod.Id]}" />
+                                </apex:outputText>
+                                <apex:outputText rendered="{!firstPeriod.MinType__c = 'Fixed'}" value="{0,number, ###,###,##0.00}">
+                                    <apex:param value="{!ContractFeePeriod_Space.fixedTotalServiced[unit][firstPeriod.Id]}" />
+                                </apex:outputText>
+                                บาทต่อเดือน
+                            </td>
+                        </tr>
+                    </apex:outputText>
+                </apex:repeat>
+
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">ค่าบริการส่วนกลางปีที่{!1}</td>
+                    <!-- <apex:variable value="{!year+1}" var="year" /> -->
+                    <td class="itemFee">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!Opportunity.Year_1_Monthly_CAM_Sq_m__c}" />
+                        </apex:outputText>
+                        บาทต่อตร.ม.ต่อเดือน เป็นเงิน
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!Opportunity.Year_1_Monthly_CAM__c}" />
+                        </apex:outputText>
+                        บาทต่อเดือน
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">รวมยอดชำระค่าเช่ารายเดือน (ปีที่ 1)</td>
+                    <td class="itemFee">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <!-- <apex:param value="{!ContractFeePeriod_Space.firstYearMonthlyFee + CamFee.totalCamFeePeriod[firstCamPeriod]}" /> -->
+                            <apex:param value="{!Opportunity.Year_1_Monthly__c}" />
+                        </apex:outputText> บาท
+                    </td>
+                </tr>
+                <!-- CamFee.totalCamFeePeriod[firstCamPeriod] -->
+
+                <apex:outputText rendered="{!calculationMethod == 'GP on Top'}">
+                    <!-- When theres only one GP value -->
+                    <apex:outputText rendered="{!GPPercentage != null}">
+                        <tr>
+                            <td class="running-sequence">{!sequenceNumber}</td>
+                            <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                            <td class="item">ค่าเช่าค่าบริการพื้นที่ GP ปีที่ 1</td>
+                            <!-- <td class="itemUnitGP" colspan="2"> คิดตั้งแต่บาทแรก ขึ้นไป</td> -->
+                            <td class="itemFee">คิดตั้งแต่บาทแรก ขึ้นไป {!GPPercentage}% ของรายได้ทั้งหมด</td>
+                            <!-- <td class="totalTextGP"> อัตราค่าเช่า
+                                <br/>{!calculationMethod}</td> -->
+                        </tr>
+                    </apex:outputText>
+                    <!-- When there's multiple period and multiple steps of GP -->
+                    <apex:variable value="{!0}" var="sequenceOccur" />
+                    <apex:variable value="{!0}" var="list" />
+                    <apex:outputText rendered="{!GPPercentage == null}">
+                        <apex:repeat value="{!GPByOppPeriod[oppPeriodId[0]]}" var="GPStep">
+                            <tr>
+                                <apex:outputText rendered="{!sequenceOccur == 0}">
+                                    <td class="running-sequence">{!sequenceNumber}</td>
+                                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                                    <td class="item">ค่าเช่าค่าบริการพื้นที่ GP ปีที่ 1</td>
+                                </apex:outputText>
+                                <apex:outputText rendered="{!sequenceOccur != 0}">
+                                    <td class="running-sequence"></td>
+                                    <td class="item"></td>
+                                </apex:outputText>
+                                <td class="itemFee">
+                                    {!GPStep.GP}% ของรายได้ทั้งหมด
+                                    <apex:outputText rendered="{!GPStep.FromR == 0}">
+                                        คิดตั้งแต่บาทแรก
+                                        <apex:outputText rendered="{!GPStep.ToR == 0}">ขึ้นไป</apex:outputText>
+                                        <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                            ถึง
+                                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                <apex:param value="{!GPStep.ToR}" />
+                                            </apex:outputText> บาท
+                                        </apex:outputText>
+                                    </apex:outputText>
+                                    <apex:outputText rendered="{!GPStep.FromR != 0}">
+                                        คิดตั้งแต่
+                                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                                            <apex:param value="{!GPStep.FromR}" />
+                                        </apex:outputText> บาท
+                                        <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                            ถึง
+                                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                <apex:param value="{!GPStep.ToR}" />
+                                            </apex:outputText> บาท
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!GPStep.ToR == 0}">
+                                            ขึ้นไป
+                                        </apex:outputText>
+                                    </apex:outputText>
+                                </td>
+                                <!-- <td class="itemFee" colspan="2">{!GPStep.GP}% ของรายได้ทั้งหมด</td> -->
+                                <!-- <apex:outputText rendered="{!sequenceOccur == 0}">
+                                    <td class="totalTextGP"> อัตราค่าเช่า
+                                        <br/>{!calculationMethod}</td>
+                                </apex:outputText> -->
+                                <apex:variable value="{!sequenceOccur+1}" var="sequenceOccur" />
+                            </tr>
+                            <apex:variable value="{!list+1}" var="list" />
+                        </apex:repeat>
+                    </apex:outputText>
+                </apex:outputText>
+
+                <apex:outputText rendered="{!Opportunity.Rental_Period_Year__c > 1}">
+                    <apex:outputText rendered="{!Opportunity.Rental_Type__c = 'Space_Rental'}">
+                        <tr>
+                            <td class="running-sequence">{!sequenceNumber}</td>
+                            <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                            <td class="item">ค่าเช่าพื้นที่ ปีที่
+                                <apex:outputText value="{0,number, ##}">
+                                    <apex:param value="{!Opportunity.Rental_Period_Year__c}" />
+                                </apex:outputText>
+                            </td>
+                            <td class="itemFee"></td>
+                            <!-- <td class="itemUnit">บาทต่อตร.ม.ต่อเดือน เป็นเงิน {!Opportunity.Year_Last_Monthly_Rental_for_Document__c} บาทต่อเดือน</td> -->
+                            <!-- <td class="itemUnit">บาทต่อตร.ม.ต่อเดือน</td>
+                        <td class="totalText">เป็นเงิน</td>
+                        <td class="totalFee">{!Opportunity.Year_Last_Monthly_Rental_for_Document__c}</td>
+                        <td class="totalUnit">บาทต่อเดือน</td> -->
+                        </tr>
+
+
+                        <apex:repeat value="{!ContractFeePeriod_Space.rentalUnit}" var="unit">
+                            <apex:outputText rendered="{!ContractFeePeriod_Space.unitIsFOC[unit]}">
+                                <tr>
+                                    <td class="running-sequence"></td>
+                                    <td class="item"> - Unit: {!unit}</td>
+                                    <td class="itemFee"></td>
+                                </tr>
+                            </apex:outputText>
+                            <apex:outputText rendered="{!!ContractFeePeriod_Space.unitIsFOC[unit]}">
+                                <apex:variable value="{!ContractFeePeriod_Space.unitDataWithPeriod[unit][lastPeriodValue]}" var="lastPeriod" />
+                                <tr>
+                                    <td class="running-sequence"></td>
+                                    <!-- <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" /> -->
+                                    <td class="item"> - Unit: {!unit}</td>
+
+                                    <td class="itemFee">
+                                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                                            <apex:param value="{!ContractFeePeriod_Space.rentFeePerSQM[unit][lastPeriod]}" />
+                                        </apex:outputText> บาทต่อตร.ม.ต่อเดือน เป็นเงิน
+                                        <apex:outputText rendered="{!lastPeriod.MinType__c = 'Measurement'}" value="{0,number, ###,###,##0.00}">
+                                            <apex:param value="{!ContractFeePeriod_Space.leasableRentalMonth[unit][lastPeriod.Id]}" />
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!lastPeriod.MinType__c = 'Fixed'}" value="{0,number, ###,###,##0.00}">
+                                            <apex:param value="{!ContractFeePeriod_Space.fixedTotalRent[unit][lastPeriod.Id]}" />
+                                        </apex:outputText>
+                                        บาทต่อเดือน
+                                    </td>
+                                </tr>
+                            </apex:outputText>
+                        </apex:repeat>
+                    </apex:outputText>
+
+                    <tr>
+                        <td class="running-sequence">{!sequenceNumber}</td>
+                        <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                        <td class="item">ค่าบริการพื้นที่ ปีที่
+                            <apex:outputText value="{0,number, ##}">
+                                <apex:param value="{!Opportunity.Rental_Period_Year__c}" />
+                            </apex:outputText>
+                        </td>
+                        <td class="itemFee">
+                        </td>
+                    </tr>
+
+                    <apex:repeat value="{!ContractFeePeriod_Space.rentalUnit}" var="unit">
+                        <apex:outputText rendered="{!ContractFeePeriod_Space.unitIsFOC[unit]}">
+                            <tr>
+                                <td class="running-sequence"></td>
+                                <td class="item"> - Unit: {!unit}</td>
+                                <td class="itemFee"></td>
+                            </tr>
+                        </apex:outputText>
+                        <apex:outputText rendered="{!!ContractFeePeriod_Space.unitIsFOC[unit]}">
+                            <apex:variable value="{!ContractFeePeriod_Space.unitDataWithPeriod[unit][lastPeriodValue]}" var="lastPeriod" />
+                            <tr>
+                                <td class="running-sequence"></td>
+                                <td class="item"> - Unit: {!unit}</td>
+
+                                <td class="itemFee">
+                                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                                        <apex:param value="{!ContractFeePeriod_Space.serviceFeePerSQM[unit][lastPeriod]}" />
+                                    </apex:outputText> บาทต่อตร.ม.ต่อเดือน เป็นเงิน
+                                    <apex:outputText rendered="{!lastPeriod.MinType__c = 'Measurement'}" value="{0,number, ###,###,##0.00}">
+                                        <apex:param value="{!ContractFeePeriod_Space.leasableServiceMonth[unit][lastPeriod.Id]}" />
+                                    </apex:outputText>
+                                    <apex:outputText rendered="{!lastPeriod.MinType__c = 'Fixed'}" value="{0,number, ###,###,##0.00}">
+                                        <apex:param value="{!ContractFeePeriod_Space.fixedTotalServiced[unit][lastPeriod.Id]}" />
+                                    </apex:outputText>
+                                    บาทต่อเดือน
+                                </td>
+                            </tr>
+                        </apex:outputText>
+                    </apex:repeat>
+
+                    <!-- GP ON TOP contract Type -->
+
+                    <!-- <apex:outputText rendered="{!IF(AND(calculationMethod == 'GP on Top',Opportunity.Rental_Period_Year__c != 1),true,false)}"> -->
+                    <apex:outputText rendered="{!calculationMethod == 'GP on Top'}" />
+                    <!-- When theres only one GP value -->
+                    <apex:outputText rendered="{!GPPercentage != null}">
+                        <tr>
+                            <td class="running-sequence">{!sequenceNumber}</td>
+                            <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                            <td class="item">ค่าเช่าค่าบริการพื้นที่ GP ปีที่
+                                <apex:outputText value="{0,number, ##}">
+                                    <apex:param value="{!Opportunity.Rental_Period_Year__c}" />
+                                </apex:outputText>
+                            </td>
+                            <!-- <td class="itemUnitGP" colspan="2"> คิดตั้งแต่บาทแรก ขึ้นไป </td> -->
+                            <td class="itemFee">คิดตั้งแต่บาทแรก ขึ้นไป {!GPPercentage}% ของรายได้ทั้งหมด</td>
+                            <!-- <td class="itemFee"> อัตราค่าเช่า
+                                    <br/>{!calculationMethod}</td> -->
+                        </tr>
+                    </apex:outputText>
+                    <!-- When there's multiple period and multiple steps of GP -->
+                    <apex:variable value="{!0}" var="sequenceOccur" />
+                    <apex:variable value="{!0}" var="list" />
+                    <apex:outputText rendered="{!IF(AND(GPPercentage == null,lastValue != 0),true,false)}">
+                        <apex:repeat value="{!GPByOppPeriod[oppPeriodId[lastValue]]}" var="GPStep">
+                            <tr>
+                                <apex:outputText rendered="{!sequenceOccur == 0}">
+                                    <td class="running-sequence">{!sequenceNumber}</td>
+                                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                                    <td class="item">ค่าเช่าค่าบริการพื้นที่ GP ปีที่
+                                        <apex:outputText value="{0,number, ##}">
+                                            <apex:param value="{!Opportunity.Rental_Period_Year__c}" />
+                                        </apex:outputText>
+                                    </td>
+                                </apex:outputText>
+                                <apex:outputText rendered="{!sequenceOccur != 0}">
+                                    <td class="running-sequence"></td>
+                                    <td class="item"></td>
+                                </apex:outputText>
+                                <td class="itemFee">
+                                    {!GPStep.GP}% ของรายได้ทั้งหมด
+                                    <apex:outputText rendered="{!GPStep.FromR == 0}">
+                                        คิดตั้งแต่บาทแรก
+                                        <apex:outputText rendered="{!GPStep.ToR == 0}">ขึ้นไป</apex:outputText>
+                                        <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                            ถึง
+                                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                <apex:param value="{!GPStep.ToR}" />
+                                            </apex:outputText> บาท
+                                        </apex:outputText>
+                                    </apex:outputText>
+                                    <apex:outputText rendered="{!GPStep.FromR != 0}">
+                                        คิดตั้งแต่
+                                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                                            <apex:param value="{!GPStep.FromR}" />
+                                        </apex:outputText> บาท
+                                        <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                            ถึง
+                                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                <apex:param value="{!GPStep.ToR}" />
+                                            </apex:outputText> บาท
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!GPStep.ToR == 0}">
+                                            ขึ้นไป
+                                        </apex:outputText>
+                                    </apex:outputText>
+                                </td>
+                                <!-- <td class="itemFee" colspan="2">{!GPStep.GP}% ของรายได้ทั้งหมด</td> -->
+                                <!-- <apex:outputText rendered="{!sequenceOccur == 0}">
+                                        <td class="totalTextGP"> อัตราค่าเช่า
+                                            <br/>{!calculationMethod}</td>
+                                    </apex:outputText> -->
+                                <apex:variable value="{!sequenceOccur+1}" var="sequenceOccur" />
+                            </tr>
+                            <apex:variable value="{!list+1}" var="list" />
+                        </apex:repeat>
+                    </apex:outputText>
+                </apex:outputText>
+                <!-- <apex:repeat value="{!CamFee.periodList}" var="period"> -->
+
+
+                <apex:outputText rendered="{!Opportunity.Rental_Period_Year__c > 1}">
+                    <tr>
+                        <td class="running-sequence">{!sequenceNumber}</td>
+                        <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                        <td class="item">ค่าบริการส่วนกลางปีที่ {!CamFee.periodList.size}</td>
+                        <!-- <apex:variable value="{!year+1}" var="year" /> -->
+                        <td class="itemFee">
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!Opportunity.Year_Last_Monthly_CAM_Sq_m__c}" />
+                            </apex:outputText> บาทต่อตร.ม.ต่อเดือน เป็นเงิน
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!Opportunity.Year_Last_Monthly_CAM__c}" />
+                            </apex:outputText>
+                            บาทต่อเดือน
+                        </td>
+                    </tr>
+                </apex:outputText>
+                <!-- </apex:repeat> -->
+
+            </apex:outputText>
+
+            <!-- GP TYPE Cotnract -->
+            <apex:outputText rendered="{!calculationMethod == 'GP no Min' || calculationMethod == 'GP with Min'}">
+                <apex:outputText rendered="{!GPPercentage != null}">
+                    <tr>
+                        <td class="running-sequence">{!sequenceNumber}</td>
+                        <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                        <td class="item">ค่าเช่าค่าบริการพื้นที่ {!calculationMethod} ปีที่ 1-3</td>
+                        <!-- <td class="itemUnitGP" colspan="2">คิดตั้งแต่บาทแรก ขึ้นไป</td> -->
+                        <td class="itemFee" colspan="2">คิดตั้งแต่บาทแรก ขึ้นไป {!GPPercentage}% ของรายได้ทั้งหมด</td>
+                        <!-- <td class="itemFee"> อัตราค่าเช่า
+                            <br/>{!calculationMethod}</td> -->
+                    </tr>
+
+                    <tr>
+                        <td class="running-sequence">{!sequenceNumber}</td>
+                        <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                        <td class="item">ค่าบริการส่วนกลาง ปีที่ 1-3</td>
+                        <td class="itemFee">{!Opportunity.Year_1_Monthly_CAM_Sq_m_for_Document__c} บาทต่อตร.ม.ต่อเดือน เป็นเงิน {!Opportunity.Year_1_Monthly_CAM_for_Document__c}
+                            บาทต่อเดือน
+                        </td>
+                        <!-- <td class="itemUnit">บาทต่อตร.ม.ต่อเดือน</td>
+                        <td class="totalText">เป็นเงิน</td>
+                        <td class="totalFee">{!Opportunity.Year_1_Monthly_CAM_for_Document__c}</td>
+                        <td class="totalUnit">บาทต่อเดือน</td> -->
+                    </tr>
+                </apex:outputText>
+
+                <!-- Multiple Period and Step of GP -->
+                <apex:variable value="{!0}" var="sequenceOccur" />
+                <apex:variable value="{!0}" var="list" />
+                <apex:outputText rendered="{!GPPercentage == null}">
+                    <apex:repeat value="{!GPByOppPeriod[oppPeriodId[0]]}" var="GPStep">
+                        <tr>
+                            <apex:outputText rendered="{!sequenceOccur == 0}">
+                                <td class="running-sequence">{!sequenceNumber}</td>
+                                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                                <td class="item">ค่าเช่าค่าบริการพื้นที่ {!calculationMethod} ปีที่ 1</td>
+                            </apex:outputText>
+                            <apex:outputText rendered="{!sequenceOccur > 0}">
+                                <td class="running-sequence"></td>
+                                <td class="item"></td>
+                            </apex:outputText>
+                            <!-- <td class="itemUnitGP" colspan="2"> -->
+                            <td class="itemFee">
+                                {!GPStep.GP}% ของรายได้ทั้งหมด
+                                <apex:outputText rendered="{!GPStep.FromR == 0}">
+                                    คิดตั้งแต่บาทแรก
+                                    <apex:outputText rendered="{!GPStep.ToR == 0}">ขึ้นไป</apex:outputText>
+                                    <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                        ถึง
+                                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                                            <apex:param value="{!GPStep.ToR}" />
+                                        </apex:outputText> บาท
+                                    </apex:outputText>
+                                </apex:outputText>
+                                <apex:outputText rendered="{!GPStep.FromR != 0}">
+                                    คิดตั้งแต่
+                                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                                        <apex:param value="{!GPStep.FromR}" />
+                                    </apex:outputText> บาท
+                                    <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                        ถึง
+                                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                                            <apex:param value="{!GPStep.ToR}" />
+                                        </apex:outputText> บาท
+                                    </apex:outputText>
+                                    <apex:outputText rendered="{!GPStep.ToR == 0}">
+                                        ขึ้นไป
+                                    </apex:outputText>
+                                </apex:outputText>
+                            </td>
+                            <!-- <td class="itemFee" colspan="2">{!GPStep.GP}% ของรายได้ทั้งหมด</td> -->
+                            <!-- <apex:outputText rendered="{!sequenceOccur == 0}">
+                                <td class="totalTextGP"> อัตราค่าเช่า
+                                    <br/>{!calculationMethod}</td>
+                            </apex:outputText> -->
+                            <apex:variable value="{!sequenceOccur+1}" var="sequenceOccur" />
+                        </tr>
+                        <apex:variable value="{!list+1}" var="list" />
+                    </apex:repeat>
+                    <apex:outputText rendered="{!oppPeriodId.size > 1}">
+                        <apex:variable value="{!0}" var="sequenceOccur" />
+                        <apex:variable value="{!0}" var="list" />
+                        <apex:repeat value="{!GPByOppPeriod[oppPeriodId[lastValue]]}" var="GPStep">
+                            <tr>
+                                <apex:outputText rendered="{!sequenceOccur == 0}">
+                                    <td class="running-sequence">{!sequenceNumber}</td>
+                                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                                    <td class="item">ค่าเช่าค่าบริการพื้นที่ {!calculationMethod} ปีที่
+                                        <apex:outputText value="{0,number, ##}">
+                                            <apex:param value="{!Opportunity.Rental_Period_Year__c}" />
+                                        </apex:outputText>
+                                    </td>
+                                </apex:outputText>
+                                <apex:outputText rendered="{!sequenceOccur != 0}">
+                                    <td class="running-sequence"></td>
+                                    <td class="item"></td>
+                                </apex:outputText>
+                                <!-- <td class="itemUnitGP" colspan="2"> -->
+                                <td class="itemFee" colspan="2">
+                                    {!GPStep.GP}% ของรายได้ทั้งหมด
+                                    <apex:outputText rendered="{!GPStep.FromR == 0}">
+                                        คิดตั้งแต่บาทแรก
+                                        <apex:outputText rendered="{!GPStep.ToR == 0}">ขึ้นไป</apex:outputText>
+                                        <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                            ถึง
+                                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                <apex:param value="{!GPStep.ToR}" />
+                                            </apex:outputText>
+                                            บาท
+                                        </apex:outputText>
+                                    </apex:outputText>
+                                    <apex:outputText rendered="{!GPStep.FromR != 0}">
+                                        คิดตั้งแต่
+                                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                                            <apex:param value="{!GPStep.FromR}" />
+                                        </apex:outputText>
+                                        บาท
+                                        <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                            ถึง
+                                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                <apex:param value="{!GPStep.ToR}" />
+                                            </apex:outputText>
+                                            บาท
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!GPStep.ToR == 0}">
+                                            ขึ้นไป
+                                        </apex:outputText>
+                                    </apex:outputText>
+                                </td>
+                                <!-- <td class="itemFee" colspan="2">{!GPStep.GP}% ของรายได้ทั้งหมด</td> -->
+                                <!-- <apex:outputText rendered="{!sequenceOccur == 0}">
+                                    <td class="totalTextGP"> อัตราค่าเช่า
+                                        <br/>{!calculationMethod}</td>
+                                    
+                                </apex:outputText> -->
+                                <apex:variable value="{!sequenceOccur+1}" var="sequenceOccur" />
+                            </tr>
+                            <apex:variable value="{!list+1}" var="list" />
+                        </apex:repeat>
+                    </apex:outputText>
+                    <tr>
+                        <td class="running-sequence">{!sequenceNumber}</td>
+                        <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                        <td class="item">ค่าบริการส่วนกลาง</td>
+                        <td class="itemFee">
+                            <!-- <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!Opportunity.Year_Last_Monthly_CAM_for_Document__c}" />
+                            </apex:outputText>  -->{!Opportunity.Year_1_Monthly_CAM_for_Document__c} บาทต่อเดือน
+                        </td>
+                        <!-- <td class="itemUnit">บาทต่อเดือน</td> -->
+                        <!-- <td class="totalText">เป็นเงิน</td>
+                        <td class="totalFee">{!Opportunity.Year_1_Monthly_CAM_for_Document__c}</td>
+                        <td class="totalUnit">บาทต่อเดือน</td> -->
+                    </tr>
+                </apex:outputText>
+            </apex:outputText>
+
+            <tr>
+                <td class="running-sequence">{!sequenceNumber}</td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                <td class="item">ระยะเวลาเช่า</td>
+                <td class="itemFee">{!Opportunity.Rental_Period_for_Document__c}</td>
+                <!-- <td class="itemUnit"></td> -->
+                <!-- <td class="totalText"></td>
+                <td class="totalFee"></td>
+                <td class="totalUnit"></td> -->
+            </tr>
+            <tr>
+                <td class="running-sequence">{!sequenceNumber}</td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                <td class="item">เงินวางจอง ณ วันเซ็นใบเสนอราคา</td>
+                <td class="itemFee">{!1} เดือนของค่าเช่ารายเดือน (ให้ถือเป็นเงินค่าเช่าและค่าบริการพื้นที่ ล่วงหน้า)</td>
+                <!-- <td class="itemUnit">เดือนของค่าเช่ารายเดือน (ให้ถือเป็นเงินค่าเช่าและค่าบริการพื้นที่ ล่วงหน้า)</td> -->
+                <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+            </tr>
+            <tr>
+                <td class="running-sequence">{!sequenceNumber}</td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                <td class="item">เงินประกันสัญญาเช่าพื้นที่และบริการ</td>
+                <td class="itemFee">
+                    <apex:outputText value="{0,number, #}">
+                        <apex:param value="{!Opportunity.Deposit_Month__c}" />
+                    </apex:outputText>
+                    เดือนของค่าเช่ารายเดือนปีสุดท้ายชำระเมื่อลงนามในสัญญาและได้คืน เมื่อครบสัญญา</td>
+                <!-- <td class="itemUnit">เดือนของค่าเช่ารายเดือนปีสุดท้ายชำระเมื่อลงนามในสัญญาและได้คืน เมื่อครบสัญญา</td> -->
+                <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+            </tr>
+            <tr>
+                <td class="running-sequence">{!sequenceNumber}</td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                <td class="item">เงินประกันการเข้าตกแต่ง</td>
+                <td class="itemFee">{!Opportunity.Decoration_Insurance_Total_for_Document__c} บาท (ชำระก่อนรับมอบพื้นที่)</td>
+                <!-- <td class="itemUnit">บาท (ชำระก่อนรับมอบพื้นที่)</td> -->
+                <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+            </tr>
+            <tr>
+                <td class="running-sequence">{!sequenceNumber}</td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                <td class="item">เงินประกันมิเตอร์น้ำ-ไฟ</td>
+                <td class="itemFee">{!Opportunity.Water_Meter_Insurance_for_Document__c} บาท (ได้คืนเมื่อครบสัญญา)</td>
+                <!-- <td class="itemUnit">บาท (ได้คืนเมื่อครบสัญญา)</td> -->
+                <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+            </tr>
+            <tr>
+                <td class="running-sequence">{!sequenceNumber}</td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                <td class="item">ค่าให้บริการพื้นที่ลากสายโทรศัพท์/ ค่าเชื่อมหมุดผ่านโครงการจุดละ</td>
+                <td class="itemFee">{!Opportunity.Internet_Cable_for_Document__c} บาท</td>
+                <!-- <td class="itemUnit">บาท</td> -->
+                <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+            </tr>
+            <apex:outputText rendered="{!Opportunity.Monthly_Electricity__c > 0}">
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">ค่าไฟ</td>
+                    <td class="itemFee">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!Opportunity.Monthly_Electricity__c}" />
+                        </apex:outputText> บาทต่อเดือน</td>
+                    <!-- <td class="itemUnit">บาทต่อหน่วย</td> -->
+                    <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+                </tr>
+            </apex:outputText>
+            <apex:outputText rendered="{!Opportunity.Monthly_Electricity__c == 0 || Opportunity.Monthly_Electricity__c == null}">
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">ค่าไฟ</td>
+                    <td class="itemFee">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!Opportunity.Electricity_Per_Unit__c}" />
+                        </apex:outputText> บาทต่อหน่วย</td>
+                    <!-- <td class="itemUnit">บาทต่อหน่วย</td> -->
+                    <!-- <td class="totalText"></td>
+                <td class="totalFee"></td>
+                <td class="totalUnit"></td> -->
+                </tr>
+            </apex:outputText>
+            <apex:outputText rendered="{!Opportunity.Monthly_Water__c > 0}">
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">ค่าน้ำ</td>
+                    <td class="itemFee">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!Opportunity.Monthly_Water__c}" />
+                        </apex:outputText> บาทต่อเดือน</td>
+                    <!-- <td class="itemUnit">บาทต่อหน่วย</td> -->
+                    <!-- <td class="totalText"></td>
+                <td class="totalFee"></td>
+                <td class="totalUnit"></td> -->
+                </tr>
+            </apex:outputText>
+            <apex:outputText rendered="{!Opportunity.Monthly_Water__c == 0 || Opportunity.Monthly_Water__c == null}">
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">ค่าน้ำ</td>
+                    <td class="itemFee">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!Opportunity.Water_Per_Unit__c}" />
+                        </apex:outputText> บาทต่อหน่วย</td>
+                    <!-- <td class="itemUnit">บาทต่อหน่วย</td> -->
+                    <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+                </tr>
+            </apex:outputText>
+            <apex:outputText rendered="{!Opportunity.Monthly_Gas__c > 0}">
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">ค่าแก๊ส</td>
+                    <td class="itemFee">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!Opportunity.Monthly_Gas__c}" />
+                        </apex:outputText> บาทต่อเดือน</td>
+                    <!-- <td class="itemUnit">บาทต่อหน่วย</td> -->
+                    <!-- <td class="totalText"></td>
+                <td class="totalFee"></td>
+                <td class="totalUnit"></td> -->
+                </tr>
+            </apex:outputText>
+            <apex:outputText rendered="{!Opportunity.Monthly_Gas__c == 0 || Opportunity.Monthly_Gas__c == null}">
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">ค่าแก๊ส</td>
+                    <td class="itemFee">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!Opportunity.Gas_Per_Unit__c}" />
+                        </apex:outputText> บาทต่อหน่วย</td>
+                    <!-- <td class="itemUnit">บาทต่อหน่วย</td> -->
+                    <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+                </tr>
+            </apex:outputText>
+            <tr>
+                <td class="running-sequence">{!sequenceNumber}</td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                <td class="item">ค่าภาษีที่ดินและสิ่งปลูกสร้าง</td>
+                <td class="itemFee">"ผู้ให้เช่า" จะเรียกเก็บจาก "ผู้เช่า" ตามอัตราที่หน่วยงานราชการประเมิน และเรียกเก็บจาก "ผู้ให้เช่า"</td>
+                <!-- <td class="itemUnit"> "ผู้ให้เช่า" จะเรียกเก็บจาก "ผู้เช่า" ตามอัตราที่หน่วยงานราชการประเมิน และเรียกเก็บจาก "ผู้ให้เช่า"</td> -->
+                <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+            </tr>
+            <tr>
+                <td class="running-sequence">{!sequenceNumber}</td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                <td class="item">ค่าอากรแสตมป์</td>
+                <td class="itemFee">ผู้เช่ารับผิดชอบโดยชำระเงินผ่านทางโครงการ</td>
+                <!-- <td class="itemUnit">ผู้เช่ารับผิดชอบโดยชำระเงินผ่านทางโครงการ</td> -->
+                <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+            </tr>
+            <apex:outputText rendered="{!IF(AND(quotationAdditionalFee.additionalFee != null, quotationAdditionalFee.additionalFee != 0),true,false)}">
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">{!quotationAdditionalFee.additionalRemark}</td>
+                    <td class="itemFee">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!quotationAdditionalFee.additionalFee}" />
+                        </apex:outputText> บาท
+                    </td>
+                    <!-- <td class="itemUnit">บาท</td> -->
+                    <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+                </tr>
+            </apex:outputText>
+            <apex:outputText rendered="{!IF(AND(quotationAdditionalFee.exhaustSystemFee != null, quotationAdditionalFee.exhaustSystemFee != 0),true,false)}">
+                <tr>
+                    <td class="running-sequence">{!sequenceNumber}</td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="item">Exhaust System </td>
+                    <td class="itemFee">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!quotationAdditionalFee.exhaustSystemFee}" />
+                        </apex:outputText> บาท
+                    </td>
+                    <!-- <td class="itemUnit">บาท</td> -->
+                    <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+                </tr>
+            </apex:outputText>
+            <apex:outputText rendered="{!IF(AND(quotationAdditionalFee.otherFee != null, quotationAdditionalFee.otherFee != 0),true,false)}">
+                <apex:variable value="{!0}" var="list" />
+                <apex:repeat value="{!quotationAdditionalFee.otherFee}" var="otherFee">
+                    <tr>
+                        <td class="running-sequence">{!sequenceNumber}</td>
+                        <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                        <td class="item">{!quotationAdditionalFee.otherRemark[list]}</td>
+                        <apex:variable value="{!list+1}" var="list" />
+                        <td class="itemFee">
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!otherFee}" />
+                            </apex:outputText> บาท
+                        </td>
+                        <!-- <td class="itemUnit">บาท</td> -->
+                        <!-- <td class="totalText"></td>
+            <td class="totalFee"></td>
+            <td class="totalUnit"></td> -->
+                    </tr>
+                </apex:repeat>
+            </apex:outputText>
+            <!-- <tr>
+                <td colspan="7"></td>
+            </tr>
+            <tr>
+                <td colspan="7">***เอกสารฉบับนี้เป็นเพียงใบเสนอราคาและเงื่อนไขการเช่าเท่านั้น ทั้งนี้สิทธิการเช่าและครอบครองพื้นที่จะสมบูรณ์ต่อเมื่อผู้เช่าลงนามในสัญญา</td>
+            </tr>
+            <tr>
+                <td colspan="7">***ผู้เช่าจะต้องไม่ขายสินค้าที่มีตราสินค้าซ้ำกันกับทางผู้ให้เช่าและต้องส่งรายละเอียดสินค้ามาให้ทางผู้ให้เช่าอนุมัติก่อนขายทุกครั้ง***</td>
+            </tr> -->
+
+        </table>
+        <!-- <br/> -->
+        <!-- <p style="text-align:center">***เอกสารฉบับนี้เป็นเพียงใบเสนอราคาและเงื่อนไขการเช่าเท่านั้น ทั้งนี้สิทธิการเช่าและครอบครองพื้นที่จะสมบูรณ์ต่อเมื่อผู้เช่าลงนามในสัญญา</p>
+        <p style="text-align:center">***ผู้เช่าจะต้องไม่ขายสินค้าที่มีตราสินค้าซ้ำกันกับทางผู้ให้เช่าและต้องส่งรายละเอียดสินค้ามาให้ทางผู้ให้เช่าอนุมัติก่อนขายทุกครั้ง***</p> -->
+        <!-- {!GPByOppPeriod[oppPeriodId[lastValue]][0]} -->
+    </div>
+    <!-- End Default Content REMOVE THIS -->
+</apex:page>

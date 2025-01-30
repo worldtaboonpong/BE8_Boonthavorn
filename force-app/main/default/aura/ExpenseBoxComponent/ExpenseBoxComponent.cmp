@@ -1,0 +1,128 @@
+<aura:component access="global" controller="QuotationPrepController">
+	<aura:attribute name="eachExpense" type="Object"  access="public"/>
+	<aura:attribute name="expenseDepositTypeOption" type="List" default="[]"/>
+    <aura:attribute name="expenseTypeValue" type="String" default="" />
+    <aura:attribute name="expenseIndex" type="String" default="" />
+    <aura:attribute name="totalInstallment" type="Decimal" default="0" />
+    <aura:attribute name="isChangeExpense" type="Boolean" default="false" />
+    <aura:attribute name="isReadOnly" type="Boolean" default="false" />
+    <aura:attribute name="isLeaseHold" type="Boolean" />
+    <aura:attribute name="oppObject" type="Object" default="{}"/>
+
+    <aura:registerEvent name="expenseObjectEvent" type="c:ExpenseInstallmentEvent"/>
+    <aura:registerEvent name="expenseObjectTypeEvent" type="c:ExpenseInstallmentEvent"/>
+    <aura:registerEvent name="expenseObjectInstallmentEvent" type="c:ExpenseInstallmentEvent"/>
+    <aura:registerEvent name="expenseObjectLeaseFloorEvent" type="c:ExpenseInstallmentEvent"/>
+    <aura:attribute name="isEditPaymentDueDate" type="Boolean" default="false" />
+    
+
+	<!-- <div class="slds-grid slds-gutters slds-m-vertical_x-small"> -->
+        
+		<aura:if isTrue="{!v.eachExpense.isLEASEHOLDSUMMARY}">
+			<h2 class="slds-text-heading_medium slds-m-vertical_x-small">Summary สิทธิการเช่า</h2>
+    		<aura:set attribute="else">
+	    		<table class="slds-m-vertical_small">
+		    		<tr>
+		    			<td>
+		            		<p class="slds-m-vertical_xx-small">Type</p>
+		    			</td>
+		    			<td>
+		    				<aura:if isTrue="{!v.eachExpense.isLEASEHOLD}">
+		    					<p class="slds-m-vertical_xx-small">{!v.eachExpense.Type}</p>
+		    					<aura:set attribute="else">
+					                <lightning:select class="slds-size_2-of-3 label-hidden" name="" label=""  value="{!v.eachExpense.Type}" onchange="{!c.handleChangeExpenseType}" disabled="{!v.isReadOnly}">
+					                	<option text="--None--" value=""/>
+								        <aura:iteration items="{!v.expenseDepositTypeOption}" var="option">
+								            <option text="{!option.label}" value="{!option.value}"/>
+								        </aura:iteration>
+								    </lightning:select>
+		    					</aura:set>
+		    				</aura:if>
+		    			</td>
+		    		</tr>
+		    		<tr>
+		    			<aura:if isTrue="{!v.eachExpense.isLEASEHOLD}">
+		    				<td colspan="2">
+		    					<table class="slds-m-vertical_small leaseholdTable">
+		    						<tr>
+		    							<th>Floor</th>
+		    							<th>Area</th>
+		    							<th>Price (Baht/Sqm)</th>
+		    							<th>Total Amount (Baht)</th>
+		    						</tr>
+		    						<aura:iteration items="{!v.eachExpense.leaseHoldInfo}" var="eachLeaseHold" indexVar="leaseHoldIndex">
+		    							<tr>
+		    								<td>{!eachLeaseHold.floorName}</td>
+		    								<td>
+		    									<lightning:formattedNumber value="{!eachLeaseHold.area}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+		    								</td>
+		    								<td>
+		    									<lightning:input class="label-hidden priceInput" type="number" name="{!leaseHoldIndex}" label="" value="{!eachLeaseHold.price}" step=".01" onblur="{!c.onBlurLeaseHoldPrice}" onchange="{!c.changeLeaseHoldPrice}" disabled="{!v.isReadOnly}"/>
+		    								</td>
+		    								<td class="priceInput">
+		    									<lightning:formattedNumber value="{!eachLeaseHold.totalAmount}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+		    								</td>
+		    							</tr>
+		    						</aura:iteration>
+		    						<tr>
+		    							<td></td>
+		    							<td>
+		    								<lightning:formattedNumber value="{!v.eachExpense.leaseHoldTotalArea}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+		    							</td>
+		    							<td class="priceInput">
+		    								<lightning:formattedNumber value="{!v.eachExpense.leaseHoldTotalPrice}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+		    							</td>
+		    							<td class="priceInput">
+		    								<lightning:formattedNumber value="{!v.eachExpense.TotalAmount}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+		    							</td>
+		    						</tr>
+		    					</table>
+		    				</td>
+		    				<aura:set attribute="else">
+				    			<td>
+				            		<p class="slds-m-vertical_xx-small">Total Amount (Baht)</p>
+				    			</td>
+				    			<td>    				
+					                <lightning:input class="slds-m-vertical_xx-small slds-size_2-of-3 label-hidden priceInput" 
+									type="number" label="" value="{!v.eachExpense.TotalAmount}" onchange="{!c.changeTotalPriceHandler}" 
+									onblur="{!c.handleChangeExenseObject}" 
+									disabled="{!v.isReadOnly}" 
+									step=".01" />
+				    			</td>
+		    				</aura:set>
+		    			</aura:if>
+		    		</tr>
+		    		<tr>
+		    			<td>
+		            		<p class="slds-m-vertical_xx-small">Number of Installment</p>
+		    			</td>
+		    			<td>
+
+		    				<div class="slds-grid slds-gutters ">
+		                        <div class="slds-col slds-size_1-of-3">
+		            			     <lightning:input class="slds-m-vertical_xx-small" type="number" name="" label="" value="{!v.eachExpense.NumberOfInstallment}" disabled = "true"/>
+		                        </div>
+		                        <div class="slds-col slds-size_1-of-3">
+		                        	<aura:if isTrue="{!not(v.isReadOnly)}">
+			            		     	<lightning:button class="slds-m-top_x-large" variant="brand" label="Add Installment" title="Add Installment" onclick="{!c.addINstallment}"  disabled="{!(v.eachExpense.isLeaseHoldDisableINstallment)?true : v.isReadOnly}"/>
+		                        	</aura:if>
+		                        </div>
+
+		                    </div>
+		    			</td>
+		    		</tr>
+		    		<tr>
+		    			<td>
+		            		<p class="slds-m-vertical_xx-small">Remark</p>
+		    			</td>
+		    			<td>
+		            		<lightning:input class="slds-m-vertical_small slds-size_2-of-3 label-hidden" name="" label="" value="{!v.eachExpense.Remark}" onblur="{!c.handleChangeExenseObject}" disabled="{!v.isReadOnly||v.eachExpense.isLeaseHoldDisableINstallment}"/>
+		    			</td>
+		    		</tr>
+		    	</table>
+    		</aura:set>
+		</aura:if>
+        <c:InstallmentTable installmentList="{!v.eachExpense.InstallmentList}" totalInstallment="{!v.eachExpense.TotalInstallment}" NumberOfInstallment="{!v.eachExpense.NumberOfInstallment}" TotalPrice="{!v.eachExpense.TotalAmount}" isChangeExpense="{!v.isChangeExpense}" isReadOnly="{!v.isReadOnly}" disableForLeasehold="{!(v.eachExpense.SubType == 'Summary สิทธืการเช่า' || v.eachExpense.isLeaseHoldDisableINstallment)}" isEditPaymentDueDate="{!v.isEditPaymentDueDate}" isLeaseHold="{!v.isLeaseHold}" oppObject="{!v.oppObject}" isLEASEHOLDSUMMARY= "{!v.eachExpense.isLEASEHOLDSUMMARY}" typeGroup="{!v.eachExpense.TypeGroup}" type="{!v.eachExpense.Type}"/>
+
+	<!-- </div> -->
+</aura:component>

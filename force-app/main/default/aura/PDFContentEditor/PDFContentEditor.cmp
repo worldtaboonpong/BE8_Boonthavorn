@@ -1,0 +1,8 @@
+<aura:component
+implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId"
+access="global" controller="PDFContentEditorController">
+<iframe src="{!'/apex/DocumentEditorPage?Id=' + v.recordId}" width="100%" height="850px"  frameBorder="0" />
+<!-- <iframe src="{!'/apex/TestQuillEditor?Id=' + v.recordId}"
+width="100%" height="350px;"
+frameBorder="0" /> -->
+</aura:component>

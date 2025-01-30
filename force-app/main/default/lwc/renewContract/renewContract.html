@@ -1,0 +1,18 @@
+<template>
+    <lightning-quick-action-panel header="Renew Contract">
+        <div if:true={isLoading} >
+            <div class="slds-spinner_container">
+                <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative">
+                  <span class="slds-assistive-text">Loading</span>
+                  <div class="slds-spinner__dot-a"></div>
+                  <div class="slds-spinner__dot-b"></div>
+                </div>
+              </div>
+        </div>
+        <p width="100%" style="text-align:center">Do you want to renew contract?</p>
+        <div slot="footer">
+            <lightning-button variant="neutral" label="Cancel" onclick={handleClose}></lightning-button>
+            <lightning-button variant="brand" class="slds-m-left_x-small" label="Save" onclick={handleRenew}></lightning-button>
+        </div>
+    </lightning-quick-action-panel>
+</template>

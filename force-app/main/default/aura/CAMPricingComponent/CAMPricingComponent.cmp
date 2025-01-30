@@ -1,0 +1,180 @@
+<aura:component access="global" controller="QuotationPrepController">
+
+	<aura:attribute name="toggleSpinner" type="Boolean" default="false" />
+	
+	<aura:handler name="init" value="{! this }" action="{! c.init }"/>
+	<aura:attribute name="camPricing" type="Object" default="{}"  access="public"/>
+	<aura:attribute name="isInitialPageWithCAM" type="Boolean" default="false"/>
+	<aura:attribute name="oppObject" type="Object" default="{}"/>
+	<aura:attribute name="camType" type="String" />
+	<aura:attribute name="leaseType" type="String" />
+	<aura:attribute name="isSelectCAMEscalation" type="Boolean" />
+	<aura:attribute name="isSelectCAMAdvance" type="Boolean" />
+	<aura:attribute name="isDisableAddCAMPeriod" type="Boolean" default="true"/>
+	<aura:attribute name="isSelectedCAMType" type="Boolean"/>
+	<aura:attribute name="isSelectedAirServiceType" type="Boolean"/>
+	<aura:attribute name="isChangePricing" type="Boolean" default="false" />
+	<aura:attribute name="isReadOnly" type="Boolean" default="false" />
+	<aura:attribute name="isEditPaymentDueDate" type="Boolean" default="false" />
+	<aura:attribute name="isEditPricing" type="Boolean" default="false" />
+	<aura:attribute name="seletedRoom" type="List"/>
+	<aura:attribute name="isEditPricingFromRequest" type="Boolean" default="false" />
+	<aura:attribute name="isConfirmRemove" type="Boolean" default="false"/>
+	<aura:attribute name="originalEsclateCAMPricing" type="Object" default="{}" />
+	<aura:attribute name="isRenewChangeDate" type="Boolean"/>
+
+
+	<aura:if isTrue="{!v.toggleSpinner}">
+	    <div  aura:id="spinnerId" class="slds-spinner_container">
+	        <div role="status" class="slds-spinner slds-spinner_medium">
+	                <span class="slds-assistive-text">Loading</span>
+	                <div class="slds-spinner__dot-a"></div>
+	                <div class="slds-spinner__dot-b"></div>
+	        </div>
+	    </div>
+	</aura:if>
+
+	<lightning:overlayLibrary aura:id="confirmOverlay"/>
+
+
+
+		<div class="slds-grid slds-gutters slds-m-vertical_x-small slds-box slds-box_x-small slds-theme_shade">
+			<div class="slds-col slds-size_1-of-2">
+					<aura:if isTrue="{!v.isSelectedCAMType}">
+						<h1 class="slds-text-heading_medium">CAM</h1>
+					</aura:if>
+					<aura:if isTrue="{!v.isSelectedAirServiceType}">
+						<h1 class="slds-text-heading_medium">Air Service</h1>
+					</aura:if>
+			</div>
+				<div class="slds-col slds-size_1-of-2">
+
+					<aura:if isTrue="{!(and(v.isEditPaymentDueDate,v.camPricing.isEnableButtonForChangeDate))}">
+						<lightning:button class="slds-float_right" variant="brand" label="Add" title="Add" onclick="{!c.addCAMPeriod}" disabled="{!v.isDisableAddCAMPeriod}"/>
+
+						<aura:set attribute="else">
+							<aura:if isTrue="{!v.leaseType == 'Short-Term' || (and(v.oppObject.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาทุกปีตามปีสัญญา'))}">
+								<aura:if isTrue="{!not(v.isReadOnly)}">
+									<lightning:button class="slds-float_right" variant="brand" label="Add" title="Add" onclick="{!c.addCAMPeriod}" disabled="{!v.isDisableAddCAMPeriod}"/>
+								</aura:if>
+							</aura:if>
+						</aura:set>
+					</aura:if>
+				</div>
+		</div>
+
+		<aura:if isTrue="{!v.leaseType == 'Short-Term' || (and(v.oppObject.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาทุกปีตามปีสัญญา'))}">
+			<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+			  <div class="slds-col slds-size_1-of-2">
+				
+				<aura:if isTrue="{!and(v.isEditPaymentDueDate,v.camPricing.isEnableEscalationTypeChangeDate)}">
+					<ui:inputRadio aura:id="% Escalation" name="camType" label="% Escalation" change="{!c.onCAMTypeGroup}" value="{!v.isSelectCAMEscalation}" />
+
+					<aura:set attribute="else">
+						<ui:inputRadio aura:id="% Escalation" name="camType" label="% Escalation" change="{!c.onCAMTypeGroup}" value="{!v.isSelectCAMEscalation}" disabled="{!v.isReadOnly}"/>
+					</aura:set>
+				</aura:if>
+				<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+					<div class="slds-col slds-size_1-of-2">
+						<p class="slds-m-vertical_x-small">CAM Escalation Rate (% Yearly)</p>
+					</div>
+					<div class="slds-col slds-size_1-of-2">
+						<lightning:input class="slds-size_2-of-3" type="number" name="camEscaltionRate" label="" value="{!v.camPricing.CAMEscationRate.value}" disabled = "{!v.camPricing.CAMEscationRate.IsDisabled}" onchange="{!c.onChangeMeasurmentPrice}"/>
+					</div>
+				</div>
+
+			  </div>
+			  <div class="slds-col slds-size_1-of-2">
+
+			  		<aura:if isTrue="{!and(v.isEditPaymentDueDate,v.camPricing.isEnableEscalationTypeChangeDate)}">
+			  			<ui:inputRadio aura:id="Advance" name="camType" label="Advance" change="{!c.onCAMTypeGroup}" value="{!v.isSelectCAMAdvance}"/>
+			  			<aura:set attribute="else">
+							<ui:inputRadio aura:id="Advance" name="camType" label="Advance" change="{!c.onCAMTypeGroup}" value="{!v.isSelectCAMAdvance}" disabled="{!v.isReadOnly}"/>
+			  			</aura:set>
+			  		</aura:if>
+
+			  </div>
+			</div>
+		</aura:if>
+
+		<aura:if isTrue="{!v.camPricing.isShowBulletText}">
+			<p>
+				<lightning:icon iconName="utility:info" alternativeText="Utility info" title="info" size="x-small"/>
+				{!$Label.c.Request_ChangeDateContract_NewCAMPeriod}
+			</p>
+		</aura:if>
+		<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+			<table>
+			  <tr>
+			    <th>From</th>
+			    <th>To</th>
+			    <th>Measurement Type</th>
+			    <th>Price (THB/Sq.M)</th>
+			    <th>Total (THB/Sq.M/Month)</th>
+			    <!--<th>Option To Renew</th>-->
+			  </tr>
+
+			  <aura:iteration items="{!v.camPricing.CAMYearPeriod}" var="camPeriod" indexVar="camPeriodIndex">
+			  	<aura:if isTrue = "{!!camPeriod.isToDeleteRecord}">
+				  	<aura:iteration items="{!camPeriod.CAMMeasurmentList}" var="eachCAMMeasurment" indexVar="camMeasurmentIndex">
+				  		<aura:if isTrue = "{!!eachCAMMeasurment.isToDeleteRecord}">
+							<aura:if isTrue = "{!camMeasurmentIndex == 0}">
+								<tr class="{!!v.isEditPricing ? (camPeriod.isStrikeThrough? 'strikethroughText' : (camPeriod.isAddBGColor ? 'cam-additional' : '')) : '' }">
+									<!-- {!camPeriod.isStrikeThrough} -->
+									<td rowspan="{!camPeriod.CAMMeasurmentList.length}">
+										<lightning:input class="label-hidden" variant="label-hidden" type="date" name="{!camPeriodIndex}" label="" value="{!camPeriod.DateFrom}" disabled="{!((v.oppObject.isAllowLongLeaseChangePeriod) ? false :camPeriod.IsDisableInput)}" onchange="{!c.onChangeDatePeriod}" dateStyle="short"/>
+									</td>
+									<td rowspan="{!camPeriod.CAMMeasurmentList.length}">
+										<lightning:input class="label-hidden" variant="label-hidden" type="date" name="{!camPeriodIndex}" label="" value="{!camPeriod.DateTo}" disabled="{!((v.oppObject.isAllowLongLeaseChangePeriod) ? false :camPeriod.IsDisableInput)}" onchange="{!c.onChangeDatePeriod}" dateStyle="short"/>
+									</td>
+									<td>{!eachCAMMeasurment.MeasurementType}</td>
+									<td>
+										<lightning:input class="slds-text-align_right priceInput label-hidden" step=".01" type="number" name="{!camPeriodIndex}" value="{!eachCAMMeasurment.Price.value}" disabled = "{!and(not(v.isEditPricing) ,v.isEditPricingFromRequest)?not(v.isEditPricing):eachCAMMeasurment.Price.IsDisabled}" onchange="{!c.onChangeMeasurmentPrice}" onblur="{!c.onBlurMeasurmentPrice}"/>
+									</td>
+									<td rowspan="{!camPeriod.CAMMeasurmentList.length}">
+										<p class="slds-text-align_right"> 
+											<lightning:formattedNumber value="{!camPeriod.TotalPrice}" maximumFractionDigits="2" minimumFractionDigits="2" />
+										</p>
+									</td>
+									<!--<td rowspan="{!camPeriod.CAMMeasurmentList.length}">
+										<lightning:input class="label-hidden" type="checkbox" label="" name="" checked="{!camPeriod.isOptionToRenew}" disabled="{!(v.isEditPaymentDueDate)?true:((v.oppObject.isAllowLongLeaseChangePeriod) ? false :camPeriod.IsDisableInput)}"/>
+									</td>-->
+									<aura:if isTrue = "{!v.isSelectCAMAdvance}">
+										<aura:if isTrue="{!( and(and(and(v.isEditPaymentDueDate,v.camPricing.isEnableButtonForChangeDate),camPeriod.Id == null),!camPeriod.isLockPeriod))}">
+											<td rowspan="{!camPeriod.CAMMeasurmentList.length}">
+												<a onclick="{!c.removeCAMAirServicePeriod}" name="{!camPeriodIndex}">
+						                            <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_small" size="small" alternativeText="Delete RO"/>
+						                            <span class="slds-assistive-text">Delete Icon</span>
+						                        </a>
+											</td>
+											<aura:set attribute="else">
+												<aura:if isTrue="{!not(v.isReadOnly)}">
+													<td rowspan="{!camPeriod.CAMMeasurmentList.length}">
+														<a onclick="{!c.removeCAMAirServicePeriod}" name="{!camPeriodIndex}">
+								                            <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_small" size="small" alternativeText="Delete RO"/>
+								                            <span class="slds-assistive-text">Delete Icon</span>
+								                        </a>
+													</td>
+												</aura:if>
+											</aura:set>
+										</aura:if>
+									</aura:if>
+
+
+								</tr>
+								<aura:set attribute="else">
+									<tr class="{!!v.isEditPricing ? (camPeriod.isStrikeThrough? 'strikethroughText' : (camPeriod.isAddBGColor ? 'cam-additional' : '')) : '' }">
+										<td>{!eachCAMMeasurment.MeasurementType}</td>
+										<td>
+											<lightning:input class="priceInput label-hidden" step=".01" type="number" name="{!camPeriodIndex}" value="{!eachCAMMeasurment.Price.value}" disabled = "{!eachCAMMeasurment.Price.IsDisabled}" onchange="{!c.onChangeMeasurmentPrice}"/>
+										</td>
+									</tr>
+								</aura:set>
+							</aura:if>	
+				  		</aura:if>
+				  	</aura:iteration>
+			  	</aura:if>
+			  </aura:iteration>
+			</table>
+		</div>
+</aura:component>

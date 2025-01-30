@@ -1,0 +1,269 @@
+<aura:component access="global" controller="QuotationPrepController">
+
+	<!-- <aura:attribute name="data" type="Object" access="public"/> -->
+    <!-- <aura:attribute name="method" type="Aura.action"/> -->
+    <aura:attribute name="recordTypeName" type="String" default=""/>
+    <aura:attribute name="oppDetail_OppBuilding" type="String" default=""/>
+    <aura:attribute name="oppDetail_OppBuildingId" type="String" default=""/>
+    <aura:attribute name="oppDetail_ContractStartDate" type="String" default=""/>
+    <aura:attribute name="oppDetail_ContractEndDate" type="String" default=""/>
+    <aura:attribute name="oppDetail_RenewStartDate" type="String"/>
+    <aura:attribute name="oppDetail_RenewEndDate" type="String"/>
+    <aura:attribute name="oppDetail_TotalMeasurmentArea" type="Decimal" default="0"/>
+    <aura:attribute name="oppDetail_TotalLeasableArea" type="Decimal" default="0"/>
+    <aura:attribute name="oppObject" type="Object"/>
+
+    <aura:handler name="init" value="{! this }" action="{! c.init }"/>
+    <aura:handler name="selectedRoomChange" value="{!v.selectedRoom}" action="{!c.handleRowAction}"/>
+    <aura:attribute name="isOpenCreateDraftROMModal" type="boolean" default="false"/>
+    <aura:attribute name="isChangeSelectedRO" type="Boolean" default="false" />
+    
+    <aura:attribute name="columns" type="List"/>
+    <aura:attribute name="data" type="List" default="[]"/>
+    <aura:attribute name="keyField" type="String" default="id"/>
+
+    <aura:attribute name="selectedRoom" type="List" default="[]" access="public"/>
+    <aura:attribute name="usageTypeOption" type="List" default="[]" access="public"/>
+    <aura:attribute name="selectedUsageType" type="String" access="public"/>
+    <aura:attribute name="outputUsageType" type="String" access="public"/>
+
+    <aura:attribute name="TotalMeasurmentArea" type="Decimal" default="0" access="public"/>
+    <aura:attribute name="TotalLeasableArea" type="Decimal" default="0" access="public"/>
+    <aura:handler name="TotalMeasurmentAreaChange" value="{!v.TotalMeasurmentArea}" action="{!c.handleRowAction}"/>
+    <aura:handler name="TotalLeasableAreaChange" value="{!v.TotalLeasableArea}" action="{!c.handleRowAction}"/>
+
+    <aura:attribute name="isConfirmRemove" type="Boolean" default="false"/>
+    <aura:attribute name="isSearchRentedRO" type="Boolean" default="false"/>
+    <aura:attribute name="isDisabledSaveButton" type="Boolean" default="false" />
+    <aura:attribute name="isReadOnly" type="Boolean" default="false" />
+    <aura:attribute name="isNoROData" type="Boolean" default="false" />
+    
+    <aura:registerEvent name="selectedROEvent" type="c:SelectedROEvent"/>
+
+    <!--  For Futher Setting -->
+    <aura:attribute name="searchROValue" type="String" default="roomnumber"/>
+    <aura:attribute name="searhROOption" type="List" default="[
+    {'label': 'Search By Room Number', 'value': 'roomnumber'},
+    {'label': 'Search By Floor', 'value': 'floor'}
+    ]"/>
+    <aura:attribute name="searchKeyLength" type="Integer" default="1"/>
+    <aura:attribute name="errorMessageWhenTooShort" type="String" default="Your search term must have at least 1 characters."/>
+    <!-- ///// -->
+
+    <aura:attribute name="measurmentListToAdd" type="List" default="[]"/>
+    <aura:attribute name="isSearching" type="Boolean" default="false"/>
+
+    <lightning:overlayLibrary aura:id="confirmOverlay"/>
+
+
+
+    <div class=" slds-m-vertical_x-small">
+        <c:OppInfoComponent OppBuilding="{!v.oppDetail_OppBuilding}" TotalLeasableArea="{!v.oppDetail_TotalLeasableArea}" TotalMeasurmentArea="{!v.oppDetail_TotalMeasurmentArea}" ContractEndDate="{!v.oppDetail_ContractEndDate}" ContractStartDate="{!v.oppDetail_ContractStartDate}" RenewStartDate="{!v.oppDetail_RenewStartDate}" RenewEndDate="{!v.oppDetail_RenewEndDate}" />
+    </div>
+    
+    <div class="componentWidth">
+
+        <aura:if isTrue="{!not(v.isReadOnly)}">
+            
+            <div class="slds-box slds-box_x-small slds-theme_shade">
+        	   <h1 class="slds-text-heading_medium">Search Rental Object</h1>
+            </div>
+
+        	<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+
+    		  <div class="slds-col slds-size_1-of-2">
+    		    
+    		    <lightning:radioGroup name="searchRORadioGroup"
+    		                          label=""
+    		                          options="{! v.searhROOption }"
+    		                          value="{! v.searchROValue }"
+    		                          type="radio"
+                                      disabled="{!v.isReadOnly}"
+                                      />
+    		  </div>
+    		  <div class="slds-col slds-size_1-of-2">
+    		   	<!--<lightning:input type="checkbox" label="Apply Rented Rental Object" name="input1" checked="{!v.isSearchRentedRO}" disabled="{!v.isReadOnly}" onchange="{!c.onchangeValue}"/>-->
+                <!-- <lightning:select name="usageType" label="Usage Type" aura:id="usageTypeId" value="{!v.selectedUsageType}" class="slds-size_2-of-3" disabled="true">
+                    <aura:iteration items="{!v.usageTypeOption}" var="option">
+                        <option text="{!option.label}" value="{!option.value}" selected="{!option.selected}"/>
+                    </aura:iteration>
+                </lightning:select> -->
+
+                <lightning:input name="usageType" readonly="true" value="{!v.outputUsageType}" label="Usage Type" />
+    		  </div>
+
+    		</div>
+
+    		<div onkeyup="{! c.searchRoom }">
+    	        <lightning:input
+    	            aura:id="enter-search"
+    	            name="enter-search"
+    	            label=""
+    	            isLoading="{!v.isSearching }"
+    	            type="search"
+                    minlength = "{!v.searchKeyLength}"
+                    messageWhenTooShort = "{!v.errorMessageWhenTooShort}"
+                    disabled="{!v.isReadOnly}"
+    	        />
+        	</div>
+
+            <aura:if isTrue="{!v.data.length > 0}">
+
+            	<div class="slds-m-top_small slds-theme_shade slds-scrollable_y slds-box" style="height: 300px">
+            		<lightning:datatable
+                        columns="{! v.columns }"
+                        data="{! v.data }"
+                        keyField="{! v.keyField }"
+                        hideCheckboxColumn="true"
+                        onrowaction="{! c.handleRowAction }"
+                        />
+
+                </div>
+
+                <aura:set attribute="else">
+                    <aura:if isTrue="{!v.isNoROData}">
+                        <div class="slds-m-top_small slds-theme_shade slds-box">
+                            <div class="slds-m-around_medium slds-align_absolute-center">
+                                No Row
+                            </div>
+                        </div>
+                    </aura:if>
+                </aura:set>
+            </aura:if>
+        </aura:if>
+
+        <div class="slds-m-top_small slds-is-expanded">
+            <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_small">
+                <h1 class="slds-text-heading_medium">Selected Room</h1>
+            </div>
+     		<aura:iteration items="{!v.selectedRoom}" var="eachSelectedRoom" indexVar="index">
+                <aura:if isTrue="{!!eachSelectedRoom.isToDeleteRecord}">
+             		<div class="slds-box slds-is-expanded slds-theme_shade slds-m-bottom_small">
+
+                        <div class="slds-clearfix">
+                            <div class="slds-float_left">
+                                <p class="slds-text-heading_small">Rental Detail</p>
+                            </div>
+                            <aura:if isTrue="{!not(v.isReadOnly)}">
+                                <div class="slds-float_right">
+                                    <a onclick="{!c.removeSelectedRoom}" name="{!index}">
+                                        <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_small" size="small" alternativeText="Delete RO"/>
+                                        <span class="slds-assistive-text">Delete Icon</span>
+                                    </a>
+                                </div>
+                            </aura:if>
+                        </div>
+                        <div class="slds-grid slds-gutters slds-m-vertical_x-small">
+                          <table>
+                            <tr>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small slds-float_left">Room No</p></td>
+                                <td class="slds-col slds-size_1-of-4 ">
+                                    <a href="{!eachSelectedRoom.selectedROURL}" target="_blank"><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.roomNumber}</p></a>
+                                </td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small slds-float_left">Usage Type</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.usageType}</p></td>
+                            </tr>
+
+                            <tr>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Floor</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.floor}</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Leasable Area</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.leasableArea}</p></td>
+                            </tr>
+                            <tr>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Available for Sales</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><lightning:input type="checkbox"  name="availabelForSaleCheckBox" checked="{!eachSelectedRoom.availableForSale}" disabled ="true"/></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Total Area</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.measurement}</p></td>
+                            </tr>
+                            <tr>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Occupied</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><lightning:input type="checkbox"  name="occupiedCheckBox" checked="{!eachSelectedRoom.occupied}" disabled ="true"/></td>
+                                <!--<td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Request Header</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.requestHeader}</p></td>-->
+                            </tr>
+                            <tr>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Current Account</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.currentAccount}</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Current Contract</p></td>
+                                <td class="slds-col slds-size_1-of-4 ">
+                                    <p class="slds-m-vertical_xx-small">
+                                        <lightning:formattedUrl value="{!eachSelectedRoom.currentContractIdLink}" tooltip="{!eachSelectedRoom.currentContract}" label="{!eachSelectedRoom.currentContract}" target="_blank" />
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Current Shop Name</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.currentShopname}</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Contract End Date</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small"><ui:outputDate value="{!eachSelectedRoom.contractEndDate}" format="DD/MM/YYYY"/></p></td>
+                            </tr>
+                            <tr>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Last Contract Account</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.lastContractAccountName}</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Last Contract</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><a href="{!eachSelectedRoom.lastContractURL}" target="_blank"><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.lastContractName}</p></a></td>
+                            </tr>
+                            <tr>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Last Contract Shop Name</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.lastContractShopName}</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Last Contract End date</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.lastContractEndDate}</p></td>
+                            </tr>
+                            <tr>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">Last Contract Start date</p></td>
+                                <td class="slds-col slds-size_1-of-4 "><p class="slds-m-vertical_xx-small">{!eachSelectedRoom.lastContractStartDate}</p></td>
+                            </tr>
+
+                          </table>  
+
+                        </div>
+                        <p class="slds-text-heading_small">Measurement</p>
+
+
+                        <div class="slds-grid slds-gutters slds-m-vertical_x-small">
+                          <div class="slds-col slds-size_1-of-2">
+                            
+                            <aura:iteration items="{!eachSelectedRoom.roMeasurmentList}" var="eachMeasurment" indexVar="indexMeasurement">
+                                <div class="slds-clearfix">
+                                    <div class="slds-float_left">
+                                        <p class="slds-m-vertical_xx-small">{!eachMeasurment.measurementName}</p>
+                                        <!-- <p class="slds-m-vertical_xx-small">FOC</p> -->
+                                    </div>
+                                    <div class="slds-float_right">
+                                        <p class="slds-m-vertical_xx-small">{!eachMeasurment.measurementArea}</p>
+                                        <!-- <p class="slds-m-vertical_xx-small">10</p> -->
+                                    </div>
+                                </div>
+                            </aura:iteration>
+                          </div>
+                          <div class="slds-col slds-size_1-of-2">
+                            
+                            <aura:iteration items="{!eachSelectedRoom.roMeasurmentList}" var="eachMeasurment" indexVar="indexMeasurement">
+                                <aura:if isTrue="{!eachMeasurment.measurementName == 'FOC'}">
+
+                                    <div class="slds-clearfix">
+                                        <div class="slds-float_left">
+                                            <p class="slds-m-vertical_xx-small">{!eachMeasurment.measurementName}</p>
+                                            <!-- <p class="slds-m-vertical_xx-small">FOC</p> -->
+                                        </div>
+                                        <div class="slds-float_right">
+                                            <p class="slds-m-vertical_xx-small">{!eachMeasurment.measurementArea}</p>
+                                            <!-- <p class="slds-m-vertical_xx-small">10</p> -->
+                                        </div>
+                                    </div>
+                                    
+                                </aura:if>
+                            </aura:iteration>
+                          </div>
+
+                        </div>
+
+            		</div>
+                </aura:if>
+       	 	</aura:iteration>
+        </div>
+
+    </div>
+
+</aura:component>

@@ -1,0 +1,164 @@
+<aura:component access="global" controller="QuotationPrepController">
+
+	<aura:handler name="init" value="{! this }" action="{! c.init }" />
+	<aura:attribute name="expenseDepositSubTypeOption" type="List" default="[]" />
+	<aura:attribute name="disabledPriceKey" type="List" default="['Actual','None Charge','Fixed Price']" />
+	<aura:attribute name="disabledRemarkKey" type="List" default="['Actual']" />
+	<aura:attribute name="disabledTotaleKey" type="List" default="['Actual','None Charge','Additional']" />
+	<aura:attribute name="otherPageObject" type="Object" />
+	<aura:attribute name="isChangeOtherExpense" type="Boolean" default="false" />
+	<aura:attribute name="isReadOnly" type="Boolean" default="false" />
+	<aura:attribute name="isOwnCashier" type="Boolean" default="false" />
+	<aura:attribute name="addedOtherExpenseType" type="String" />
+	<aura:attribute name="otherExpenseOption" type="List" default="[]"/>
+	<aura:attribute name="oppObject" type="Object" default="{}"/>
+	<aura:attribute name="isConfirmRemove" type="Boolean" default="false"/>
+
+	<lightning:overlayLibrary aura:id="confirmOverlay"/>
+
+
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small slds-box slds-box_x-small slds-theme_shade">
+		<div class="slds-col slds-size_1-of-2">
+			<h1 class="slds-text-heading_medium">Expense &#38; Fee</h1>
+		</div>
+		<div class="slds-col slds-size_1-of-2">
+            <aura:if isTrue="{!not(v.isReadOnly)}">
+				<lightning:button class="slds-float_right" variant="brand" label="Add Expense" title="Add Expense" onclick="{!c.addOtherExpense}" />
+            </aura:if>
+		</div>
+	</div>
+
+	<lightning:overlayLibrary aura:id="addOtherExpenseOverLey"/>
+
+	<div class="slds-m-top_small slds-is-expanded">
+		<aura:iteration items="{!v.otherPageObject.rateAndAreaFormatList}" var="eachOtherExpense"
+			indexVar="eachOtherExpenseIndex">
+			<aura:if isTrue="{!not(eachOtherExpense.isToDeleteRecord)}">
+				<div class="slds-box slds-is-expanded slds-m-bottom_small">
+					<div class="slds-clearfix">
+						<div class="slds-float_left">
+							<p class="slds-text-heading_small">{!eachOtherExpense.Type}</p>
+						</div>
+						<div class="slds-float_right">
+	                        	
+	                        <aura:if isTrue="{!not(v.isReadOnly)}">
+		                        <a onclick="{!c.removeRateAndArea}" name="{!eachOtherExpenseIndex}">
+		                            <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_small" size="small" alternativeText="Delete RO"/>
+		                            <span class="slds-assistive-text">Delete Icon</span>
+		                        </a>
+	                        </aura:if>
+	                    </div>
+					</div>
+					<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+						<table>
+							<tr>
+								<td>
+									<p class="slds-m-vertical_x-small">Type</p>
+								</td>
+								<td>
+									<lightning:select class="slds-size_2-of-3 label-hidden" name="{!eachOtherExpenseIndex}"
+										label="" value="{!eachOtherExpense.SubType}" onchange="{!c.handleChangeSubType}"
+										disabled="{!v.isReadOnly}">
+										<aura:iteration items="{!v.expenseDepositSubTypeOption}" var="option">
+											<option text="{!option.label}" value="{!option.value}" />
+										</aura:iteration>
+									</lightning:select>
+								</td>
+								<!--<td>
+									<p class="slds-m-vertical_x-small">Area (Sq.M.)</p>
+								</td>
+								<td>
+									<lightning:input class="slds-m-vertical_small slds-size_2-of-3 label-hidden"
+										disabled="{!(v.isReadOnly?true:eachOtherExpense.isDisabledRateAndArea)}"
+										type="number" name="{!eachOtherExpenseIndex}" label=""
+										value="{!eachOtherExpense.Area}" onchange="{!c.calculatePrice}" onblur="{!c.OnblurArea}" step=".01"/>
+								</td>-->
+							</tr>
+							<tr>
+								<td>
+									<p class="slds-m-vertical_x-small">Total</p>
+								</td>
+								<td>
+									<lightning:input class="slds-m-vertical_small slds-size_2-of-3 label-hidden priceInput"
+										disabled="{!(v.isReadOnly?true:eachOtherExpense.isDisabledTotal)}" type="number"
+										name="{!eachOtherExpenseIndex}" label="" value="{!eachOtherExpense.Total}" onchange="{!c.onChangeInput}" onblur="{!c.OnblurTotal}"
+										step=".01" />
+								</td>
+								<td>
+									<p class="slds-m-vertical_x-small">Rate</p>
+								</td>
+								<td>
+									<lightning:input class="slds-m-vertical_small slds-size_2-of-3 label-hidden"
+										disabled="{!(v.isReadOnly?true:eachOtherExpense.isDisabledRateAndArea)}"
+										type="number" name="{!eachOtherExpenseIndex}" label=""
+										value="{!eachOtherExpense.Rate}" onchange="{!c.calculatePrice}" onblur="{!c.OnblurRate}" step=".01"/>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<p class="slds-m-vertical_x-small">Remark</p>
+								</td>
+								<td colspan="3">
+									<lightning:textarea class="slds-size_2-of-3" name="remarkInput" label=""
+										value="{!eachOtherExpense.Remark}" onchange="{!c.onChangeInput}"
+										disabled="{!(v.isReadOnly?true:eachOtherExpense.isDisabledRemark)}" />
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</aura:if>
+		</aura:iteration>
+
+		<aura:iteration items="{!v.otherPageObject.fixedFormatList}" var="eachOtherExpense" indexVar="eachOtherFixedExpenseIndex">
+			<aura:if isTrue="{!not(eachOtherExpense.isToDeleteRecord)}">
+				<aura:if isTrue="{!or(notequals(eachOtherExpense.Type, 'Cashier'), v.isOwnCashier)}">
+
+					<div class="slds-box slds-is-expanded slds-m-bottom_small">
+						<div class="slds-clearfix">
+							<div class="slds-float_left">
+								<p class="slds-text-heading_small">{!eachOtherExpense.Type}</p>
+							</div>
+							<div class="slds-float_right">                        	
+		                        <aura:if isTrue="{!not(v.isReadOnly)}">
+			                        <a onclick="{!c.removeFixedFormat}" name="{!eachOtherFixedExpenseIndex}">
+			                            <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_small" size="small" alternativeText="Delete RO"/>
+			                            <span class="slds-assistive-text">Delete Icon</span>
+			                        </a>
+		                        </aura:if>
+		                    </div>
+						</div>
+
+						<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+							<table>
+								<tr>
+									<td>
+										<p class="slds-m-vertical_x-small">Monthly (Baht)</p>
+									</td>
+									<td>
+										<lightning:input
+											class="slds-m-vertical_small slds-size_2-of-3 label-hidden priceInput"
+											type="number" name="{!eachOtherFixedExpenseIndex}" label="" value="{!eachOtherExpense.Monthly}"
+											onchange="{!c.onChangeInput}" onblur="{!c.OnblurFixedMonthly}" disabled="{!v.isReadOnly}" step=".01"
+											required="{!v.isOwnCashier}"  />
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<p class="slds-m-vertical_x-small">Remark</p>
+									</td>
+									<td>
+										<lightning:textarea class="slds-size_2-of-3 label-hidden" name="remarkInput"
+											label="" value="{!eachOtherExpense.Remark}" onchange="{!c.onChangeInput}"
+											disabled="{!v.isReadOnly}"/>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</aura:if>
+			</aura:if>
+		</aura:iteration>
+	</div>
+
+</aura:component>

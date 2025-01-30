@@ -1,0 +1,246 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" access="global" controller="QuotationPrepController">
+
+    <c:lax context="{!this}" />
+
+	<aura:html tag="style">
+		.slds-modal__container{
+			width: 70% !important;
+			max-width: 80% !important;
+
+		}
+		.slds-modal__content{
+			height: 100% !important;
+		    max-height: inherit	 !important;
+		}
+		.slds-docked-form-footer{
+			display: unset;
+		}
+	</aura:html>
+	
+	
+	<aura:handler name="init" value="{! this }" action="{! c.init }"/>
+	<aura:attribute name="isInitialPageWithRO" type="Boolean" default="false"/>
+	<aura:attribute name="isInitialPageWithCAM" type="Boolean" default="false"/>
+	<aura:attribute name="isInitialPageWithRentService" type="Boolean" default="false"/>
+	<aura:attribute name="isInitialPageWithPeriod" type="Boolean" default="false"/>
+
+	<aura:attribute name="rentServiceType" type="String" default="% Escalation"/>
+	<aura:attribute name="seletedRoom" type="List" />
+	<aura:attribute name="camPricing" type="Object"/>
+	<aura:attribute name="rentServicePricing" type="Object"/>
+	<aura:attribute name="fixPeriodPricing" type="List" default="[]"/>
+	<aura:attribute name="gpPeriodPricing" type="List" default="[]"/>
+	<aura:attribute name="periodPricing" type="List"/>
+	<aura:attribute name="usageTypeOption" type="List" default="[]"/>
+	<aura:attribute name="reportingRuleOption" type="List" default="[]"/>
+	<aura:attribute name="reportingRuleMap" type="Map" default="{}"/>
+	<aura:attribute name="minTypeOption" type="List" default="[]"/>
+	<aura:attribute name="expenseTypeOption" type="List" default="[]"/>
+	<aura:attribute name="otherDepositTypeOption" type="List"/>
+	<aura:attribute name="expenseDepositSubTypeOption" type="List" default="[]"/>
+	<aura:attribute name="depositInputMethodOption" type="List" default="[]"/>
+	<aura:attribute name="depositOption" type="List" default="[]"/>
+	<aura:attribute name="paymentTypeOption" type="List" default="[]"/>
+	<aura:attribute name="calcultationAndReporting" type="List" default="[]"/>
+	<aura:attribute name="calculationMethodOption" type="List" default="[]"/>
+	<aura:attribute name="otherExpenseOption" type="List" default="[]"/>
+	<aura:attribute name="expenseList" type="List" />
+	<aura:attribute name="depositObject" type="Object"/>
+	<aura:attribute name="otherPageObject" type="Object"/>
+	<aura:attribute name="selectedUsageType" type="String" default="10"/>
+	<aura:attribute name="outputUsageType" type="String" access="public"/>
+	<aura:attribute name="recordTypeName" type="String" default=""/>
+	<aura:attribute name="disabledAddDeposit" type="Boolean" default="false"/>
+	<aura:attribute name="yearlyTierOption" type="List" default="[]"/>
+	<aura:attribute name="isMeasurementAreaChange" type="Boolean" default="false"/>
+
+
+	<aura:attribute name="recordId" type="Id" />
+	<aura:attribute name="toggleSpinner" type="Boolean" default="false" />
+	<aura:attribute name="isChangeSelectedRO" type="Boolean" default="false" />
+	<aura:attribute name="isRenewChangeDate" type="Boolean" />
+	<aura:attribute name="isRenewCAMChangeDate" type="Boolean" />
+	<aura:attribute name="isChangePricing" type="Boolean" default="false" />
+	<aura:attribute name="isChangeGrading" type="Boolean" default="false" />
+	<aura:attribute name="isChangeExpense" type="Boolean" default="false" />
+	<aura:attribute name="isChangeDeposit" type="Boolean" default="false" />
+	<aura:attribute name="isChangeOtherExpense" type="Boolean" default="false" />
+	<aura:attribute name="isDisabledSaveButton" type="Boolean" default="false" />
+	<aura:attribute name="progresStep" type="String" default="1" />
+	<aura:attribute name="oppObject" type="Object" default="{}"/>
+	
+	<aura:handler name="RegenerateRentServiceEvent" event="c:RentServiceEvent" action="{!c.regenerateRenserviceController}"/>
+
+	<aura:handler name="selectedROEvent" event="c:SelectedROEvent" action="{!c.selectedROEventController}"/>
+	<aura:handler name="oppDetailEvent" event="c:OppDetailEvent" action="{!c.oppDetailEventController}"/>
+	<!--<aura:handler name="PeriodChangeEvent" event="c:PeriodChangeEvent" action="{!c.changePeriodEvent}"/> -->
+
+
+	<aura:if isTrue="{!v.toggleSpinner}">
+	    <div  aura:id="spinnerId" class="slds-spinner_container">
+	        <div role="status" class="slds-spinner slds-spinner_medium">
+	                <span class="slds-assistive-text">Loading</span>
+	                <div class="slds-spinner__dot-a"></div>
+	                <div class="slds-spinner__dot-b"></div>
+	        </div>
+	    </div>
+	</aura:if>
+	<div class="slds-modal__header slds-size_1-of-1">
+		<h4 class="slds-text-heading_large">{!v.oppObject.oppName}</h4>
+	</div>
+	<div class="slds-modal__container">
+
+		<lightning:progressIndicator currentStep="{!v.progresStep}" type="path" variant="base">
+			<lightning:progressStep label="RO Selection" value="1"/>
+			<aura:if isTrue="{!v.oppObject.pricingType == 'Fixed'}">
+				<lightning:progressStep label="Fix Pricing" value="2"/>
+			</aura:if>
+			<aura:if isTrue="{!v.oppObject.pricingType != 'Fixed'}">
+				<lightning:progressStep label="GP Pricing" value="2"/>
+			</aura:if>
+			<aura:if isTrue="{!AND(v.oppObject.rentType != 'Billboard_Rental', v.oppObject.rentType != 'Event_Rental')}">
+				<lightning:progressStep label="Deposit" value="3"/>
+			</aura:if>
+			<lightning:progressStep label="Expense &#38; Fee" value="4"/>
+			<lightning:progressStep label="Other" value="5"/>
+		
+		</lightning:progressIndicator>
+
+
+		<div class="slds-m-vertical_x-small">
+		    <aura:if isTrue="{!v.progresStep == '1'}">
+	    		<c:ROSelectionComponent aura:id="ROSelectionComponent"
+	    		isChangeSelectedRO = "{!v.isChangeSelectedRO}" 
+	    		isDisabledSaveButton = "{!v.isDisabledSaveButton}"
+	    		selectedRoom="{!v.seletedRoom}" 
+	    		usageTypeOption="{!v.usageTypeOption}" 
+	    		selectedUsageType="{!v.selectedUsageType}"
+	    		outputUsageType="{!v.outputUsageType}" 
+	    		TotalLeasableArea="{!v.oppObject.totalLeasableArea}" 
+	    		TotalMeasurmentArea="{!v.oppObject.totalMeasurmentArea}" 
+	    		oppDetail_OppBuilding="{!v.oppObject.buildingName}" 
+	    		oppDetail_OppBuildingId="{!v.oppObject.buildingId}"
+	    		oppDetail_ContractEndDate="{!v.oppObject.contractEndDateFrom}" 
+	    		oppDetail_ContractStartDate="{!v.oppObject.contractStartDate}" 
+	    		oppDetail_TotalLeasableArea="{!v.oppObject.totalLeasableArea}" 
+	    		oppDetail_TotalMeasurmentArea="{!v.oppObject.totalMeasurmentArea}"
+	    		oppDetail_RenewStartDate="{!v.oppObject.renewStartDate}"
+	    		oppDetail_RenewEndDate="{!v.oppObject.renewEndDate}"
+	    		isReadOnly="{!v.oppObject.isReadOnly}"
+	    		isSearchRentedRO = "{!v.oppObject.isRentedRO}"
+	    		recordTypeName = "{!v.recordTypeName}"
+	    		oppObject="{!v.oppObject}"
+	    		/>
+	  		</aura:if> 
+	  		<aura:if isTrue="{!v.progresStep == '2'}">
+
+	  			<aura:if isTrue="{!v.oppObject.pricingType == 'Fixed'}">
+		    		<c:FixPricingComponent 
+		    		camPricing="{!v.camPricing}" 
+		    		isInitialPageWithCAM="{!v.isInitialPageWithCAM}"
+		    		isInitialPageWithRentService="{!v.isInitialPageWithRentService}"
+					isInitialPageWithPeriod="{!v.isInitialPageWithPeriod}"
+		    		calculationReporting="{!v.calcultationAndReporting}"
+		    		calculationMethodOption = "{!v.calculationMethodOption}"
+		    		rentServicePricing="{!v.rentServicePricing}" 
+		    		periodPricing="{!v.periodPricing}"
+		    		oppObject="{!v.oppObject}"
+		    		oppDetail_OppBuilding="{!v.oppObject.buildingName}" 
+		    		oppDetail_ContractEndDate="{!v.oppObject.contractEndDateFrom}" 
+		    		oppDetail_ContractStartDate="{!v.oppObject.contractStartDate}" 
+		    		oppDetail_TotalLeasableArea="{!v.oppObject.totalLeasableArea}" 
+		    		oppDetail_TotalMeasurmentArea="{!v.oppObject.totalMeasurmentArea}"
+		    		oppDetail_LeaseType = "{!v.oppObject.leaseType}"
+		    		oppDetail_CAMOrAirService = "{!v.oppObject.camOrAirService}"
+		    		rentServiceType="{!v.rentServiceType}"
+		    		seletedRoom = "{!v.seletedRoom}"
+		    		isChangePricing = "{!v.isChangePricing}"
+		    		isReadOnly="{!v.oppObject.isReadOnly}"
+		    		minTypeOption="{!v.minTypeOption}"
+		    		isRenewChangeDate="{!v.isRenewChangeDate}"
+		    		isRenewCAMChangeDate="{!v.isRenewCAMChangeDate}"
+		    		/>
+	  			</aura:if>
+	  			<aura:if isTrue="{!v.oppObject.pricingType != 'Fixed'}">
+		    		<c:GPPricingComponent 
+		    		camPricing="{!v.camPricing}"
+		    		isInitialPageWithCAM="{!v.isInitialPageWithCAM}"
+		    		isInitialPageWithRentService="{!v.isInitialPageWithRentService}"
+					isInitialPageWithPeriod="{!v.isInitialPageWithPeriod}"
+		    		calculationReporting="{!v.calcultationAndReporting}"
+		    		calculationMethodOption = "{!v.calculationMethodOption}"
+		    		rentServicePricing="{!v.rentServicePricing}" 
+		    		periodPricing="{!v.periodPricing}"
+		    		oppObject="{!v.oppObject}"
+		    		oppDetail_OppBuilding="{!v.oppObject.buildingName}" 
+		    		oppDetail_ContractEndDate="{!v.oppObject.contractEndDateFrom}" 
+		    		oppDetail_ContractStartDate="{!v.oppObject.contractStartDate}" 
+		    		oppDetail_TotalLeasableArea="{!v.oppObject.totalLeasableArea}" 
+		    		oppDetail_TotalMeasurmentArea="{!v.oppObject.totalMeasurmentArea}"
+		    		oppDetail_LeaseType = "{!v.oppObject.leaseType}"
+		    		oppDetail_CAMOrAirService = "{!v.oppObject.camOrAirService}"
+		    		oppDetail_calculationAndReporting = "{!v.oppObject.calculationAndReporting}"
+		    		reportingRuleOption = "{!v.reportingRuleOption}"
+		    		minTypeOption = "{!v.minTypeOption}"
+		    		reportingRuleMap =  "{!v.reportingRuleMap}"
+		    		rentServiceType="{!v.rentServiceType}"
+		    		seletedRoom = "{!v.seletedRoom}"
+		    		isChangePricing = "{!v.isChangePricing}"
+		    		isChangeGrading = "{!v.isChangeGrading}"
+		    		isReadOnly="{!v.oppObject.isReadOnly}"
+		    		yearlyTierOption = "{!v.yearlyTierOption}"
+		    		isRenewChangeDate="{!v.isRenewChangeDate}"
+		    		isRenewCAMChangeDate="{!v.isRenewCAMChangeDate}"/>
+	  			</aura:if>
+	  		</aura:if>
+	  		<aura:if isTrue="{!v.progresStep == '3'}">
+	  			<c:DepositComponent 
+	  			depositObject="{!v.depositObject}" 
+	  			depositInputMethodOption="{!v.depositInputMethodOption}"
+	  			depositOption = "{!v.depositOption}" 
+	  			expenseDepositTypeOption="{!v.otherDepositTypeOption}" 
+	  			paymentMethod="{!v.paymentTypeOption}"
+	  			camPricing="{!v.camPricing}"
+	  			periodPricing="{!v.periodPricing}"
+	  			oppObject="{!v.oppObject}"
+	  			isChangeDeposit="{!v.isChangeDeposit}"
+	  			isReadOnly="{!v.oppObject.isReadOnly}"
+	  			disabledAddDeposit="{!v.disabledAddDeposit}"/>
+	  		</aura:if> 
+	  		<aura:if isTrue="{!v.progresStep == '4'}">
+	  			<c:QuoteOtherComponent  otherPageObject="{!v.otherPageObject}" expenseDepositSubTypeOption="{!v.expenseDepositSubTypeOption}" isChangeOtherExpense="{!v.isChangeOtherExpense}"
+	  			isReadOnly="{!v.oppObject.isReadOnly}" isOwnCashier="{!v.oppObject.isOwnCashier}" otherExpenseOption="{!v.otherExpenseOption}" oppObject="{!v.oppObject}"/>
+	  		</aura:if> 
+	  		<aura:if isTrue="{!v.progresStep == '5'}">
+	    		<c:ExpenseFeePageComponent expenseList="{!v.expenseList}" expenseDepositTypeOption="{!v.expenseTypeOption}" isChangeExpense="{!v.isChangeExpense}" isReadOnly="{!v.oppObject.isReadOnly}" oppObject="{!v.oppObject}" selectedRoom="{!v.seletedRoom}"/>
+            </aura:if>
+		</div>
+
+
+
+	</div>
+	<div class="slds-docked-form-footer" style="border-radius: 0.25rem; 
+	border-top: 0.2rem solid #dddbda;
+	padding: 1rem !important;box-shadow: none !important; 
+	background: rgb(243,242,242) !important;
+	margin-bottom: 3% !important;">
+    
+	    <div class="slds-grid slds-gutters slds-m-top_small">
+		  	<aura:if isTrue="{!not(v.progresStep == '1')}">
+			  <div class="slds-col slds-align_absolute-center">
+			    	<lightning:button label="Back" iconName="utility:jump_to_left" iconPosition="right" variant="destructive" onclick="{!c.clickBackStep}"/>
+			  </div>
+			</aura:if>
+		  <div class="slds-col slds-align_absolute-center">
+		    <lightning:button  label="Save And Close" iconName="utility:dock_panel" iconPosition="right" variant="brand" onclick="{!c.saveAndClose}" disabled="{!v.isDisabledSaveButton}"/>
+		  </div>
+
+			<aura:if isTrue="{!not(v.progresStep == '5')}">
+				<div class="slds-col slds-align_absolute-center">
+					<lightning:button label="Save And Next" iconName="utility:jump_to_right" iconPosition="right" variant="brand" onclick="{!c.clickNextStep}" disabled="{!v.isDisabledSaveButton}"/>
+				</div>
+			</aura:if>
+		</div>
+
+	</div>
+</aura:component>

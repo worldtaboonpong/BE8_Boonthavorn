@@ -1,0 +1,18 @@
+<template>
+    <lightning-card>
+        <h3 slot="title">
+            Master Plan
+        </h3>
+        <p class="slds-p-horizontal_small">
+            <c-project-selector onselectionchange={handleSelectionChange}></c-project-selector>
+            <!-- <lightning-tabset> -->
+                <!-- <lightning-tab label="Table View">
+                    <c-table-view></c-table-view>
+                </lightning-tab> -->
+                <!-- <lightning-tab label="Plan View"> -->
+                    <c-plan-view floor-list={floorList}></c-plan-view>
+                <!-- </lightning-tab> -->
+            <!-- </lightning-tabset> -->
+        </p>
+    </lightning-card>
+</template>

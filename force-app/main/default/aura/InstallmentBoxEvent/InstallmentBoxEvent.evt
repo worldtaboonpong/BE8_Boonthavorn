@@ -1,0 +1,6 @@
+<aura:event type="COMPONENT">
+	<aura:attribute name="installmentIndex" type="String"/>
+	<aura:attribute name="installmentObjet" type="Object" />
+	<aura:attribute name="isEditInstallment" type="Boolean" default="false" />
+	<aura:attribute name="isDeleteInstallment" type="Boolean" default="false" />
+</aura:event>

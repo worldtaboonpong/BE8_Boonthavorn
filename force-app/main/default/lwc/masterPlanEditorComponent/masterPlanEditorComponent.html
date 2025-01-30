@@ -1,0 +1,128 @@
+<template>
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+    </template>
+    <lightning-card>
+        <h2 slot="title">
+            Master Plan Editor
+        </h2>
+        <div class="slds-p-horizontal_small">
+            <c-project-selector onselectionchange={handleSelectionChange}></c-project-selector>
+        </div>
+    </lightning-card>
+    <div class="slds-grid slds-wrap slds-m-top_small">
+        <div class="slds-col slds-size_2-of-3">
+            <lightning-card>
+                <div class="slds-p-horizontal_small">
+                    <c-plan-view onfloorchange={handleFloorChange} onnewdraftunit={handleNewDraftUnit}
+                        floor-list={floorList} mode="edit"></c-plan-view>
+                </div>
+            </lightning-card>
+        </div>
+        <div class="slds-col slds-size_1-of-3">
+            <lightning-card>
+                <h3 slot="title">
+                    Editor
+                </h3>
+                <div class="slds-card__body slds-card__body_inner">
+                    <article class="slds-card slds-card_boundary">
+                        <div class="slds-card__header slds-grid">
+                            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                <div class="slds-media__body">
+                                    <h3 class="slds-card__header-title">
+                                        <span>Current Unit</span>
+                                    </h3>
+                                </div>
+                            </header>
+                        </div>
+                        <div class="slds-card__body slds-card__body_inner">
+                            <div>
+                                <c-lookup onselectionchange={handleUnitSelectionChange} onsearch={handleUnitSearch}
+                                    label="Select Unit" placeholder="Select Unit to Assign">
+                                </c-lookup>
+                            </div>
+                            <div class="slds-text-align_right slds-m-top_small">
+                                <lightning-button variant="brand" label="Save Unit" title="Save Unit"
+                                    onclick={handleSaveUnit} disabled={disableSaveUnitButton}></lightning-button>
+                            </div>
+                        </div>
+                    </article>
+                    <!--<article class="slds-card slds-card_boundary">
+                        <div class="slds-card__header slds-grid">
+                            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                <div class="slds-media__body">
+                                    <h3 class="slds-card__header-title">
+                                        <span>Clone to Other Floors</span>
+                                    </h3>
+                                </div>
+                                <div class="slds-no-flex">
+                                    <lightning-button variant="brand-outline" label={cloneShowHideLabel}
+                                        title={cloneShowHideLabel} onclick={handleShowHideClone}></lightning-button>
+                                </div>
+                            </header>
+                        </div>
+                        <template if:true={showCloneSection}>
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div>
+                                    <c-lookup onselectionchange={handleStartFloorSelectionChange}
+                                        onsearch={handleFloorSearch} label="From" placeholder="Select Floor">
+                                    </c-lookup>
+                                    <c-lookup onselectionchange={handleEndFloorSelectionChange}
+                                        onsearch={handleFloorSearch} label="to" placeholder="Select Floor">
+                                    </c-lookup>
+                                </div>
+                                <div class="slds-text-align_right slds-m-top_small">
+                                    <lightning-button variant="brand" label="Clone" title="Clone" onclick={handleClone}>
+                                    </lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                    </article>-->
+                    <article class="slds-card slds-card_boundary">
+                        <div class="slds-card__header slds-grid">
+                            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                <div class="slds-media__body">
+                                    <h3 class="slds-card__header-title">
+                                        <span>Unit List</span>
+                                    </h3>
+                                </div>
+                            </header>
+                        </div>
+                        <div class="slds-card__body slds-card__body_inner">
+                            <article class="slds-card slds-card_boundary">
+                                <div class="slds-card__body slds-card__body_inner">
+                                    <div class="slds-text-align_right slds-m-top_small">
+                                        <lightning-button class="slds-m-left_x-small" variant="brand" label="Save All"
+                                            title="Save All" onclick={handleSaveAll}></lightning-button>
+                                        <lightning-button icon-name="utility:undo" class="slds-m-left_x-small"
+                                            variant="brand-outline" label="Undo" title="Undo" onclick={handleUndo}
+                                            disabled={disabledUndo}></lightning-button>
+                                        <lightning-button class="slds-m-left_x-small" variant="destructive"
+                                            label="Reset" title="Reset" onclick={handleReset}></lightning-button>
+                                    </div>
+                                    <!-- <div class="slds-m-top_small">
+                                        <lightning-input type="number" label="Size" value={pointerSize} onchange={handleSizeChange}></lightning-input>
+                                    </div> -->
+                                    <template for:each={unitWithCoordList} for:item="unit">
+                                        <div key={unit.unitKey} class="slds-grid slds-gutters slds-m-top_small">
+                                            <div class="slds-col slds-size_1-of-2">
+                                                {unit.unitKey}
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                                                <lightning-button-icon name={unit.unitKey} data-key={unit.unitKey}
+                                                    icon-name="utility:delete" alternative-text="Delete"
+                                                    class="slds-m-left_xx-small" title="Delete" size="xx-small"
+                                                    onclick={handleDeleteUnit}></lightning-button-icon>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+                </div>
+            </lightning-card>
+        </div>
+    </div>
+
+</template>

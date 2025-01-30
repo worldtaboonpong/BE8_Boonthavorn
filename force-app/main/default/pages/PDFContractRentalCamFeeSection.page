@@ -1,0 +1,25 @@
+<apex:page standardController="Contract__c" extensions="OppPDFSubPageController" showHeader="false" sidebar="false" standardStylesheets="false"
+    applyBodyTag="false" applyHtmlTag="false">
+
+    <apex:variable value="{!1}" var="year" />
+    <div class="text-container">
+        <p class="contractFeeWording" style="text-indent: 3em;">
+            ผู้รับบริการตกลงชำระค่าบริการ สำหรับการให้บริการพื้นที่ส่วนกลาง ตามข้อ 1.2 ดังกล่าว ให้แก่ผู้ให้บริการ เป็นระยะเวลา {!Contract__c.Rental_Period_for_Document__c}
+            ดังนี้
+        </p>
+        <apex:repeat value="{!CamFee.periodList}" var="period">
+            <p class="contractFeeSubWording">
+                - ปีที่ {!year} ชำระค่าบริการพื้นที่ส่วนกลางในอัตราเดือนละ
+                <apex:outputText value="{0,number, ###,###,##0.00}">
+                    <apex:param value="{!CamFee.camFeePeriod[period]}" />
+                </apex:outputText> บาท ({!CamFee.camFeePeriodText[period]} บาท) ต่อ 1 (หนึ่ง) ตารางเมตร คิดเป็นค่าบริการจำนวน
+                <apex:outputText value="{0,number, ###,###,##0.00}">
+                    <apex:param value="{!CamFee.totalCamFeePeriod[period]}" />
+                </apex:outputText> บาท ({!CamFee.totalCamFeePeriodText[period]} บาท) ต่อเดือน (ยังไม่รวมภาษีมูลค่าเพิ่ม)
+
+            </p>
+            <apex:variable value="{!year+1}" var="year" />
+        </apex:repeat>
+
+    </div>
+</apex:page>

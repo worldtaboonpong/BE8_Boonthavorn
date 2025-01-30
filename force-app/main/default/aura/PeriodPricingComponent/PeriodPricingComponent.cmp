@@ -1,0 +1,87 @@
+<aura:component access="global" controller="QuotationPrepController">
+	
+	<aura:handler name="init" value="{! this }" action="{! c.init }"/>
+
+    <aura:attribute name="oppObject" type="Object" default="{}"/>
+    <aura:attribute name="seletedRoom" type="List" default="[]"/>
+	<aura:attribute name="rentServiceType" type="String" />
+	<aura:attribute name="periodPricing" type="List" default="[]"/>
+	<aura:attribute name="addedPeriodType" type="String" />
+    <aura:attribute name="leaseType" type="String"/>
+    <aura:attribute name="calculationMethodOption" type="List" default="[]"/>
+    <aura:attribute name="reportingRuleOption" type="List" default="[]"/>
+    <aura:attribute name="reportingRuleMap" type="Map" default="{}"/>
+    <aura:attribute name="minTypeOption" type="List" default="[]"/>
+    <aura:attribute name="isReadOnly" type="Boolean" default="false" />
+    <aura:attribute name="isEditPaymentDueDate" type="Boolean" default="false" />
+    <aura:attribute name="isEditPricing" type="Boolean" default="false" />
+    <aura:attribute name="isChangeGrading" type="Boolean" default="false" />
+    <aura:attribute name="isConfirmRemove" type="Boolean" default="false"/>
+    <aura:attribute name="yearlyTierOption" type="List" default="[]"/>
+    <aura:attribute name="isRenewChangeDate" type="Boolean"/>
+    
+    <aura:attribute name="isChangePricing" type="Boolean" default="false" />
+    <aura:handler name="PeriodChangeEvent" event="c:PeriodChangeEvent" action="{!c.changePeriodEvent}"/>
+
+
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small slds-box slds-box_x-small slds-theme_shade">
+		<div class="slds-col slds-size_1-of-2">
+			<h1 class="slds-text-heading_medium">Period</h1>
+		</div>
+		<div class="slds-col slds-size_1-of-2">
+            <aura:if isTrue="{!not(v.isReadOnly)}">
+                <aura:if isTrue = "{!(v.leaseType == 'Short-Term' || (and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาทุกปีตามปีสัญญา')))}">
+    			     <lightning:button class="slds-float_right" variant="brand" label="Add Period" title="Add Period" onclick="{!c.addPeriod}" />
+                </aura:if>
+            </aura:if>
+		</div>
+	</div>
+
+	<lightning:overlayLibrary aura:id="addPeriodOverLey"/>
+    <lightning:overlayLibrary aura:id="confirmOverlay"/>
+
+	<div class="slds-m-top_small slds-is-expanded">
+ 		<aura:iteration items="{!v.periodPricing}" var="eachPeriod" indexVar="eachPeriodIndex">
+            <aura:if isTrue = "{!!eachPeriod.isToDeleteRecord}">
+         		<div class="slds-box slds-is-expanded slds-m-bottom_small">
+
+                    <div class="slds-clearfix">
+                        <div class="slds-float_left">
+                            <p class="slds-text-heading_small">Period #{!eachPeriod.PeriodNumber}</p>
+                        </div>
+                        <div class="slds-float_right">
+                        	<aura:if isTrue = "{!(v.leaseType == 'Short-Term' || (and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาทุกปีตามปีสัญญา')))}">
+                                <aura:if isTrue="{!not(v.isReadOnly)}">
+        	                        <a onclick="{!c.removeSelectedPeriod}" name="{!eachPeriodIndex}">
+        	                            <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_small" size="small" alternativeText="Delete RO"/>
+        	                            <span class="slds-assistive-text">Delete Icon</span>
+        	                        </a>
+                                </aura:if>
+                        	</aura:if>
+                        </div>
+                    </div>
+                    <aura:if isTrue = "{!eachPeriod.CalculationMethod == 'Fixed Rental Object'}">
+                    	<c:FixRentalObjectComponent eachPeriod="{!eachPeriod}" rentServiceType="{!v.rentServiceType}" leaseType="{!v.leaseType}" isChangePricing="{!v.isChangePricing}" isReadOnly="{!v.isReadOnly}" isEditPaymentDueDate="{!v.isEditPaymentDueDate}" isEditPricing="{!v.isEditPricing}" isRenewWithPrice="{!v.oppObject.optionToRenewWithPrince}" periodIndex="{!eachPeriodIndex}" oppObject="{!v.oppObject}" minTypeOption="{!v.minTypeOption}" isRenewChangeDate="{!v.isRenewChangeDate}"/>
+                	</aura:if>
+                	<aura:if isTrue = "{!eachPeriod.CalculationMethod == 'Fixed Price'}">
+                		<c:FixPricePeriodComponent eachPeriod="{!eachPeriod}" rentServiceType="{!v.rentServiceType}" leaseType="{!v.leaseType}" isChangePricing="{!v.isChangePricing}" isReadOnly="{!v.isReadOnly}" isEditPaymentDueDate="{!v.isEditPaymentDueDate}" isEditPricing="{!v.isEditPricing}" isRenewWithPrice="{!v.oppObject.optionToRenewWithPrince}" periodIndex="{!eachPeriodIndex}" oppObject="{!v.oppObject}" minTypeOption="{!v.minTypeOption}" isRenewChangeDate="{!v.isRenewChangeDate}"/>
+                	</aura:if>
+                	<aura:if isTrue = "{!eachPeriod.CalculationMethod == 'Fixed Measurement'}">
+                		<c:FixMeasurmentPeriodComponent eachPeriod="{!eachPeriod}" rentServiceType="{!v.rentServiceType}" leaseType="{!v.leaseType}" isChangePricing="{!v.isChangePricing}" isReadOnly="{!v.isReadOnly}" isEditPaymentDueDate="{!v.isEditPaymentDueDate}" isEditPricing="{!v.isEditPricing}" isRenewWithPrice="{!v.oppObject.optionToRenewWithPrince}" periodIndex="{!eachPeriodIndex}" oppObject="{!v.oppObject}" isRenewChangeDate="{!v.isRenewChangeDate}"/>
+                	</aura:if>
+                    <aura:if isTrue = "{!eachPeriod.CalculationMethod == 'GP with Min'}">
+                        <c:GPWithMinPeriodComponent eachPeriod="{!eachPeriod}" leaseType="{!v.leaseType}" reportingRuleOption="{!v.reportingRuleOption}" minTypeOption="{!v.minTypeOption}" reportingRuleMap="{!v.reportingRuleMap}" rentServiceType="{!v.rentServiceType}" isChangePricing="{!v.isChangePricing}" isReadOnly="{!v.isReadOnly}" isEditPaymentDueDate="{!v.isEditPaymentDueDate}" isEditPricing="{!v.isEditPricing}" isRenewWithPrice="{!v.oppObject.optionToRenewWithPrince}" periodIndex="{!eachPeriodIndex}" oppObject="{!v.oppObject}" isChangeGrading="{!v.isChangeGrading}" yearlyTierOption = "{!v.yearlyTierOption}" isRenewChangeDate="{!v.isRenewChangeDate}"/>
+                    </aura:if>
+                    <aura:if isTrue = "{!eachPeriod.CalculationMethod == 'GP no Min'}">
+                        <c:GPNoMinPeriodComponent eachPeriod="{!eachPeriod}" leaseType="{!v.leaseType}" reportingRuleOption="{!v.reportingRuleOption}" reportingRuleMap="{!v.reportingRuleMap}" rentServiceType="{!v.rentServiceType}" isChangePricing="{!v.isChangePricing}" isReadOnly="{!v.isReadOnly}" isEditPaymentDueDate="{!v.isEditPaymentDueDate}" isRenewWithPrice="{!v.oppObject.optionToRenewWithPrince}" periodIndex="{!eachPeriodIndex}" oppObject="{!v.oppObject}"  isChangeGrading="{!v.isChangeGrading}" yearlyTierOption = "{!v.yearlyTierOption}" isRenewChangeDate="{!v.isRenewChangeDate}"/>
+                    </aura:if>
+                    <aura:if isTrue = "{!eachPeriod.CalculationMethod == 'GP on Top'}">
+                        <c:GPOnTopPeriodComponent eachPeriod="{!eachPeriod}" leaseType="{!v.leaseType}" reportingRuleOption="{!v.reportingRuleOption}" minTypeOption="{!v.minTypeOption}" reportingRuleMap="{!v.reportingRuleMap}" rentServiceType="{!v.rentServiceType}" isChangePricing="{!v.isChangePricing}" isReadOnly="{!v.isReadOnly}" isEditPaymentDueDate="{!v.isEditPaymentDueDate}" isEditPricing="{!v.isEditPricing}" isRenewWithPrice="{!v.oppObject.optionToRenewWithPrince}" periodIndex="{!eachPeriodIndex}" oppObject="{!v.oppObject}" isChangeGrading="{!v.isChangeGrading}" yearlyTierOption = "{!v.yearlyTierOption}" isRenewChangeDate="{!v.isRenewChangeDate}"/>
+                    </aura:if>
+
+        		</div>
+            </aura:if>
+   	 	</aura:iteration>
+    </div>
+
+</aura:component>

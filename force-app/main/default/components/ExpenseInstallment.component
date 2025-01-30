@@ -1,0 +1,30 @@
+<apex:component controller="ExpenseInstallmentController" access="global">
+    <apex:attribute name="conId" assignTo="{!contractId}"  type="Id" description="Contract Id" />
+    <apex:repeat value="{!ExpenseInstallments}" var="item" >
+        <apex:outputText value="{!item}" /><br/>
+        <table >
+            <tr>
+                <th>Installment</th>
+                <th>Installment Amount</th>
+                <th>Payment Due Date</th>
+                <th>Remark</th>
+            </tr>
+            <apex:repeat value="{!ExpenseInstallments[item]}" var="install"  >
+                <tr>
+                    <td>งวดที่ {!install.InstallmentNumber} Security Deposit</td>
+                    <td> 
+                        <apex:outputText value="{0,number, ###,###.##}">
+                            <apex:param value="{!install.InstallmentAmount}"/>
+                        </apex:outputText>
+                    </td>
+                    <td>
+                        <apex:outputText value="{0,date,dd' 'MMMMM' 'yyyy}">
+                            <apex:param value="{!install.PaymentDueDate}" /> 
+                        </apex:outputText>
+                    </td>
+                    <td>{!install.remark}</td>
+                </tr>
+            </apex:repeat>
+        </table>
+    </apex:repeat>
+</apex:component>

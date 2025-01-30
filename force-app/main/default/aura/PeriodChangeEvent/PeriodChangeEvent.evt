@@ -1,0 +1,7 @@
+<aura:event type="COMPONENT">
+	<aura:attribute name="periodIndex" type="String"/>
+	<aura:attribute name="periodStartDate" type="String"/>
+	<aura:attribute name="periodEndDate" type="String"/>
+	<aura:attribute name="isOptionToReNew" type="Boolean"/>
+	<aura:attribute name="isIncludedCAM" type="Boolean"/>
+</aura:event>

@@ -1,0 +1,222 @@
+<apex:page standardController="Opportunity" extensions="OppPDFSubPageController" action="{!updatedData}" showHeader="false"
+    sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false">
+
+
+    <apex:variable value="{!1}" var="sequenceNumber" />
+
+    <div class="quotationTable">
+        <table width="100%">
+            <tr>
+                <td class="header-one">ลำดับที่
+                    <br/> No.</td>
+                <td class="header-two">รายการ
+                    <br/> Description</td>
+                <td class="header-three">ปริมาณ
+                    <br/> Quantity </td>
+                <td class="header-four">หน่วย
+                    <br/> Unit </td>
+                <td class="header-five"> ราคา/หน่วย(บาท)
+                    <br/> Unit Cost (Baht)</td>
+                <td class="header-six"> จำนวนเงิน (เงินบาท)
+                    <br/> Amount (Baht) </td>
+            </tr>
+            <!-- <tr>
+                <td class="emptyBlock"></td>
+                <td class="emptyBlock"></td>
+                <td class="emptyBlock"></td>
+                <td class="emptyBlock"></td>
+                <td class="emptyBlock"></td>
+                <td class="emptyBlock"></td>
+            </tr> -->
+            <tr>
+                <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                <td class="mainContent description">
+                    ค่าให้บริการพื้นที่ประชาสัมพันธ์/โฆษณา
+                </td>
+                <td class="mainContent number">
+                    <!-- {!BillBoardQuotationData.months} -->
+                </td>
+                <td class="mainContent number">
+                    <!-- Month -->
+                </td>
+                <td class="mainContent number">
+                    <!-- <apex:outputText value="{0,number, ###,###,##0.00}">
+                        <apex:param value="{!BillBoardQuotationData.rentPrice}" />
+                    </apex:outputText> -->
+                </td>
+                <td class="mainContent number">
+                    <!-- <apex:outputText value="{0,number, ###,###,##0.00}">
+                        <apex:param value="{!BillBoardQuotationData.totalRentPrice}" />
+                    </apex:outputText> -->
+
+                </td>
+            </tr>
+            <apex:outputText rendered="{!Not(BillBoardQuotationData.unitList.size == 0)}">
+                <apex:repeat value="{!BillBoardQuotationData.unitList}" var="unit">
+                    <tr>
+                        <td class="mainContent running-sequence"></td>
+                        <td class="mainContent description"> &nbsp; - Unit No. {!BillBoardQuotationData.unitName[unit]} </td>
+                        <td class="mainContent number"> {!BillBoardQuotationData.unitMonth[unit]}</td>
+                        <td class="mainContent number"> เดือน</td>
+                        <td class="mainContent number">
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!BillBoardQuotationData.unitAvgRentalPrice[unit]}" />
+                            </apex:outputText>
+                        </td>
+                        <td class="mainContent number">
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!BillBoardQuotationData.unitTotalRentalPrice[unit]}" />
+                            </apex:outputText>
+                        </td>
+                    </tr>
+                </apex:repeat>
+            </apex:outputText>
+
+            <apex:outputText rendered="{!BillBoardQuotationData.bannerSizeList.size > 0}">
+                <tr>
+                    <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="mainContent description"> ค่าผลิตป้าย
+                        <apex:repeat value="{!BillBoardQuotationData.bannerSizeList}" var="BannerSize">
+                            <p class="subDescription">&nbsp; - ป้ายขนาด {!BannerSize} </p>
+                        </apex:repeat>
+                    </td>
+                    <td class="mainContent number"> 1 </td>
+                    <td class="mainContent number"> ครั้ง</td>
+                    <td class="mainContent number">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!BillBoardQuotationData.signCreatationFee}" />
+                            <!-- {!total} -->
+                        </apex:outputText>
+                    </td>
+                    <td class="mainContent number">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!BillBoardQuotationData.signCreatationFee}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:outputText>
+            <!-- Deposit_Amount_THB__c -->
+            <!-- Deposit_Month__c -->
+            <apex:outputText rendered="{!IF(AND(BillBoardQuotationData.installmentFee != null, BillBoardQuotationData.installmentFee != 0),true,false)}">
+                <tr>
+                    <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="mainContent description">ค่าติดตั้งป้าย</td>
+                    <td class="mainContent number">{!1}</td>
+                    <td class="mainContent number"> ครั้ง </td>
+                    <td class="mainContent number">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!BillBoardQuotationData.installmentFee}" />
+                            <!-- {!total} -->
+                        </apex:outputText>
+
+                    </td>
+                    <td class="mainContent number">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!BillBoardQuotationData.installmentFee}" />
+                            <!-- {!total} -->
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:outputText>
+            <apex:outputText rendered="{!BillBoardQuotationData.subTypeElec=='Actual'}">
+                <tr>
+                    <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="mainContent description">ค่าไฟ</td>
+                    <td class="mainContent number"></td>
+                    <td class="mainContent number"></td>
+                    <td class="mainContent number">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!BillBoardQuotationData.elecRate}" />
+                        </apex:outputText>
+                    </td>
+                    <td class="mainContent number"></td>
+                </tr>
+            </apex:outputText>
+            <apex:outputText rendered="{!BillBoardQuotationData.subTypeElec=='Fixed Price'}">
+                <tr>
+                    <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="mainContent description">ค่าไฟ</td>
+                    <td class="mainContent number">{!BillBoardQuotationData.totalRentalMonth}</td>
+                    <td class="mainContent number"> เดือน</td>
+                    <td class="mainContent number">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!BillBoardQuotationData.elecPrice}" />
+                        </apex:outputText>
+                    </td>
+                    <td class="mainContent number">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!BillBoardQuotationData.totalElecPrice}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:outputText>
+            <!-- additional request -->
+            <apex:outputText rendered="{!IF(AND(BillBoardQuotationData.additionalFee !=null , BillBoardQuotationData.additionalFee != 0),true,false)}">
+                <tr>
+                    <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="mainContent description">{!BillBoardQuotationData.additionalRemark}</td>
+                    <td class="mainContent number">{!1}</td>
+                    <td class="mainContent number"> ครั้ง</td>
+                    <td class="mainContent number">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!BillBoardQuotationData.additionalFee}" />
+                        </apex:outputText>
+                    </td>
+                    <td class="mainContent number">
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!BillBoardQuotationData.additionalFee}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:outputText>
+
+
+
+            <!-- Footer -->
+            <tr>
+                <td colspan="5" class="footer-one">
+                    จำนวนเงินรวม
+                </td>
+                <td class="footer number">
+                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                        <apex:param value="{!BillBoardQuotationData.allTotal}" />
+                        <!-- {!total} -->
+                    </apex:outputText>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" class="footer-one">
+                    ภาษีมูลค่าเพิ่ม
+                </td>
+                <td class="footer number">
+                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                        <apex:param value="{!BillBoardQuotationData.vat}" />
+                        <!-- {!vat7} -->
+                    </apex:outputText>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" class="footer-two">
+                    {!BillBoardQuotationData.grandTotalText}
+                </td>
+                <td class="footer number">
+                    จำนวนเงินทั้งสิ้น
+                </td>
+                <td class="footer number">
+                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                        <apex:param value="{!BillBoardQuotationData.grandTotal}" />
+                        <!-- {!grandTotal} -->
+                    </apex:outputText>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+
+</apex:page>

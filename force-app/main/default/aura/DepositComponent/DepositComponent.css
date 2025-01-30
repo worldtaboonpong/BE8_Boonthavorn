@@ -1,0 +1,39 @@
+.THIS table.depositTable {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .THIS td.depositTable{
+    border: 2px solid #666666;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  .THIS th.depositTable{
+    border: 2px solid #666666;
+    background-color: #cccccc;
+    text-align: center;
+    padding: 8px;
+  }
+  
+  .THIS tr.depositTable{
+    background-color: #f2f2f2;
+  }
+  
+  .THIS.customRadioCls .slds-form-element__control .slds-radio{
+      display : inline-block !important;
+      padding-right: 10% !important;
+  }
+  
+  .THIS .label-hidden > label {
+      display: none;
+  }
+  
+  .THIS .priceInput input { 
+    text-align: right !important;
+  }
+  
+  .THIS td.priceInput{ 
+    text-align: right !important;
+  }

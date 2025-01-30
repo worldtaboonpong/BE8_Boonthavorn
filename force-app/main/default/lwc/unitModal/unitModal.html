@@ -1,0 +1,107 @@
+<template>
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate"> Room No. {unit.unitKey}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_small" id="modal-content-id-1">
+                    <div class="slds-box slds-m-top_x-small">
+                        <lightning-layout multiple-rows class="slds-p-bottom_medium">
+                            <template for:each={retalObjectHeaderFieldList} for:item="eachfield">
+                                <lightning-layout-item key={eachfield.labelLeft} size="12" small-device-size="6" medium-device-size="4" large-device-size="3">
+                                        {eachfield.labelLeft}
+                                </lightning-layout-item>
+                                <lightning-layout-item key={eachfield.apiLeft} size="12" small-device-size="6" medium-device-size="4" large-device-size="3">
+                                        : {eachfield.valueLeft}
+                                </lightning-layout-item>
+                                <lightning-layout-item key={eachfield.labelRight} size="12" small-device-size="6" medium-device-size="4" large-device-size="3">
+                                        {eachfield.labelRight}
+                                </lightning-layout-item>
+                                <lightning-layout-item key={eachfield.apiRight} size="12" small-device-size="6" medium-device-size="4" large-device-size="3">
+                                        : {eachfield.valueRight}
+                                </lightning-layout-item>
+                            </template>
+                        </lightning-layout>
+                        <div class="slds-border_top slds-p-bottom_medium"></div>
+                        <lightning-layout multiple-rows >
+                            <!-- <lightning-record-view-form record-id="a0D0T000001PIefUAG" object-api-name="tms_RentalObject__c">
+                                <template for:each={columnAPIName} for:item="eachfield">
+                                    <lightning-layout-item key={eachfield} size="12" small-device-size="6" medium-device-size="4" large-device-size="3">
+                                        <lightning-output-field field-name={eachfield} variant="label-hidden"></lightning-output-field>
+                                    </lightning-layout-item>
+                                </template>
+                            </lightning-record-view-form> -->
+                            <!-- <lightning-record-view-form record-id={targetRentalObject.Id} object-api-name="tms_RentalObject__c"> -->
+                            <template for:each={retalObjectDetailFieldList} for:item="eachfield">
+                                    <lightning-layout-item key={eachfield.labelLeft} size="12" small-device-size="6" medium-device-size="4" large-device-size="3">
+                                            {eachfield.labelLeft}
+                                    </lightning-layout-item>
+                                    <lightning-layout-item key={eachfield.apiLeft} size="12" small-device-size="6" medium-device-size="4" large-device-size="3">
+                                            <template if:false={eachfield.isBooleanLeft}>
+                                                : {eachfield.valueLeft}
+                                            </template>
+                                            <template if:true={eachfield.isBooleanLeft}>
+                                                <template if:true={eachfield.valueLeft}>
+                                                        : <input type="checkbox" disabled="disabled" checked="checked">
+                                                </template>
+                                                <template if:false={eachfield.valueLeft}>
+                                                        : <input type="checkbox" disabled="disabled">
+                                                </template>
+                                            </template>
+                                            <!-- <lightning-output-field field-name={eachfield.apiLeft} variant="label-hidden"></lightning-output-field> -->
+                                    </lightning-layout-item>
+                                    <lightning-layout-item key={eachfield.labelRight} size="12" small-device-size="6" medium-device-size="4" large-device-size="3">
+                                            {eachfield.labelRight}
+                                    </lightning-layout-item>
+                                    <lightning-layout-item key={eachfield.apiRight} size="12" small-device-size="6" medium-device-size="4" large-device-size="3">
+                                            <template if:false={eachfield.isBooleanRight}>
+                                                    : {eachfield.valueRight}
+                                                </template>
+                                            <template if:true={eachfield.isBooleanRight}>
+                                                <template if:true={eachfield.valueRight}>
+                                                        : <input type="checkbox" disabled="disabled" checked="checked">
+                                                </template>
+                                                <template if:false={eachfield.valueRight}>
+                                                        : <input type="checkbox" disabled="disabled">
+                                                </template>
+                                            </template>
+                                            <!-- <lightning-output-field field-name={eachfield.apiRight} variant="label-hidden"></lightning-output-field> -->
+                                    </lightning-layout-item>
+                            </template>
+                        <!-- </lightning-record-view-form> -->
+                            
+                        </lightning-layout>
+                    </div>
+                    
+                    <template if:true={targetOppLineItemList.length}>    
+                        <div class="slds-box slds-m-top_x-small">
+                            <lightning-datatable data={targetOppLineItemList} 
+                                                columns={columnOpportunityList} 
+                                                key-field="Id" 
+                                                hide-checkbox-column>
+                            </lightning-datatable>
+                        </div>
+                    </template>
+                    
+                    <template if:true={targetContractLineItemList.length}>
+                        <div class="slds-box slds-m-top_x-small">
+                            <lightning-datatable data={targetContractLineItemList} 
+                                                columns={columnContractList} 
+                                                key-field="Id" 
+                                                hide-checkbox-column>
+                            </lightning-datatable>
+                        </div>
+                    </template>
+                    
+                </div>
+                
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

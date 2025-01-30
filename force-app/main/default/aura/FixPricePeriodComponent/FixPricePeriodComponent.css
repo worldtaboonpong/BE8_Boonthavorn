@@ -1,0 +1,16 @@
+.THIS .label-hidden > label {
+    display: none;
+}
+
+.THIS.customRadioCls .slds-form-element__control .slds-radio{
+    display : inline-block !important;
+    padding-right: 40%;
+}
+
+.THIS .centerInput input { 
+    text-align: center !important;
+}
+
+.THIS .priceInput input { 
+    text-align: right !important;
+}

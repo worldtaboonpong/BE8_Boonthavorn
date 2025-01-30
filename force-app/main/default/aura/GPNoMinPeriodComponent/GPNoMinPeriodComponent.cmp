@@ -1,0 +1,188 @@
+<aura:component access="global" controller="QuotationPrepController">
+
+	<aura:handler name="init" value="{! this }" action="{! c.init }"/>
+	
+	<aura:attribute name="eachPeriod" type="Object" default="{}"  access="public"/>
+	<aura:attribute name="addedRangReportingRule" type="String" />
+	<aura:attribute name="addedRangReportingRuleLabel" type="String" />
+    <aura:attribute name="leaseType" type="String"/>
+    <aura:attribute name="reportingRuleOption" type="List" default="[]"/>
+    <aura:attribute name="reportingRuleMap" type="Map" default="{}"/>
+    <aura:attribute name="rentServiceType" type="String" />
+    <aura:attribute name="isChangePricing" type="Boolean" default="false" />
+    <aura:attribute name="isReadOnly" type="Boolean" default="false" />
+    <aura:attribute name="isEditPaymentDueDate" type="Boolean" default="false" />
+    <aura:attribute name="isRenewWithPrice" type="Boolean" default="false" />
+    <aura:attribute name="isDisabledAllSales" type="Boolean" default="false" />
+    <aura:attribute name="isDisableIncludeCAM" type="Boolean" default="false" />
+    <aura:attribute name="periodIndex" type="String"/>
+    <aura:attribute name="oppObject" type="Object" default="{}"/>
+    <aura:attribute name="isChangeGrading" type="Boolean" default="false" />
+    <aura:attribute name="isConfirmRemove" type="Boolean" default="false"/>
+    <aura:attribute name="yearlyTierOption" type="List" default="[]"/>
+    <aura:attribute name="isRenewChangeDate" type="Boolean"/>
+
+
+    <lightning:overlayLibrary aura:id="confirmOverlay"/>
+
+    <aura:registerEvent name="PeriodChangeEvent" type="c:PeriodChangeEvent"/>
+
+    <div class="slds-grid slds-gutters">
+         <div class="slds-col slds-size_1-of-2">
+            <lightning:input class="slds-m-vertical_x-small" type="date" label="Pricing From" disabled="{!((v.oppObject.isAllowLongLeaseChangePeriod) ? false :(and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาปีปฏิทินแรก')))}" readonly="{!v.isReadOnly}" value="{!v.eachPeriod.PricingFrom}" dateStyle="short" onchange="{!c.onChangeDatePeriod}"/>
+         </div>
+         <div class="slds-col slds-size_1-of-2">
+            <lightning:input class="slds-m-vertical_x-small" type="date" label="Pricing To" disabled="{!((v.oppObject.isAllowLongLeaseChangePeriod) ? false : (and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาปีปฏิทินแรก')))}" readonly="{!v.isReadOnly}" value="{!v.eachPeriod.PricingTo}" dateStyle="short" onchange="{!c.onChangeDatePeriod}"/>
+         </div>
+    </div>
+
+	<div class="slds-grid slds-gutters">
+		<div class="slds-col slds-size_1-of-2">
+        <div class="slds-clearfix">
+            <div class="slds-float_left">
+                <p class="slds-m-vertical_x-small">Is All Sales</p>
+                <p class="slds-m-vertical_x-small">Calculation Method</p>
+                <!-- <p class="slds-m-vertical_x-small">Pricing From</p>
+                <p class="slds-m-vertical_x-small">Pricing To</p> -->
+            </div>
+            <div class="slds-float_right">
+                <lightning:input class="slds-m-vertical_x-small" type="checkbox"  name="" checked="{!v.eachPeriod.IsAllSales}" onchange="{!c.onChangePricing}" disabled="{!(v.isReadOnly?v.isReadOnly:v.isDisabledAllSales)}"/>
+                <p class="slds-m-vertical_x-small" style="word-break: inherit; width: 250px;">{!v.eachPeriod.CalculationMethodLabel}</p>
+                <!-- <p class="slds-m-vertical_x-small"><ui:outputDate value="{!v.eachPeriod.PricingFrom}" format="DD/MM/YYYY"/></p>
+                <p class="slds-m-vertical_x-small"><ui:outputDate value="{!v.eachPeriod.PricingTo}" format="DD/MM/YYYY"/></p> -->
+            </div>
+        </div>
+    </div>
+      <div class="slds-col slds-size_1-of-2">
+        <div class="slds-clearfix">
+            <div class="slds-float_left">
+                    <!--<p class="slds-m-vertical_x-small">Option To Renew</p>-->
+                    <!-- <p class="slds-m-vertical_x-small">Is Include CAM</p> -->
+                    <aura:if isTrue = "{!and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาปีปฏิทินแรก')}">
+                        <p class="slds-m-vertical_x-small">Escalation Remark</p>
+                    </aura:if>
+					<p class="slds-m-vertical_x-small"><span style="color: red;">* </span>Estimate Revenue (Monthly)</p>
+            </div>
+            <div class="slds-float_right">
+                <!--<lightning:input class="slds-m-vertical_x-small" type="checkbox"  name="" checked="{!v.eachPeriod.OptionToRenew}" onchange="{!c.onChangeOptionToRenew}" disabled="{!(and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาปีปฏิทินแรก')?true:(v.isRenewWithPrice?false:((v.oppObject.isAllowChangeOptionToRenew)?false : (v.isReadOnly?v.isReadOnly:v.isDisabledAllSales))))}"/>-->
+                <!-- <lightning:input class="slds-m-vertical_x-small" type="checkbox"  name="" checked="{!v.eachPeriod.IsIncludeCAM}" disabled ="{!v.isReadOnly}" onchange="{!c.onChangePeriodIncludeCAM}"/> -->
+                <aura:if isTrue = "{!and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาปีปฏิทินแรก')}">
+                    <lightning:textarea class="slds-m-vertical_x-small label-hidden" name="" value="{!v.eachPeriod.escalationRemark}" onchange="{!c.onChangePricing}" disabled="{!v.isReadOnly}"/>
+                </aura:if>
+				<lightning:input class="priceInput label-hidden" type="number" step=".01" name="" value="{!v.eachPeriod.EstimateRevernue}" onchange="{!c.onChangePricing}" disabled="{!v.isReadOnly}"/>
+            </div>
+            	
+        </div>
+      </div>
+	</div>
+
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small slds-theme_default">
+		<div class="slds-col slds-size_1-of-2">
+			<p class="slds-text-heading_small">GP Calculation</p>
+		</div>
+		<!--<div class="slds-col slds-size_1-of-2">
+			<aura:if isTrue="{!not(v.isReadOnly)}">
+				<lightning:button class="slds-float_right" variant="brand" label="Add Range" title="Add Range" onclick="{!c.addReportingRule}" disabled="{!v.isReadOnly}"/>
+			</aura:if>
+		</div>-->
+	</div>
+
+	<lightning:overlayLibrary aura:id="addRangReportingRule"/>
+
+	<aura:iteration items="{!v.eachPeriod.GPNoMinSection.ReportingRuleList}" var="eachReportingRule" indexVar="reportingRuleIndex">
+		<aura:if isTrue = "{!!eachReportingRule.isToDeleteRecord}">
+			<table class="slds-m-vertical_x-small">
+				<tr>
+					<th style="width:25%;">{!eachReportingRule.ReportingRuleLabel}</th>
+					<aura:if isTrue="{!v.oppObject.isGPYearlyTier}">
+						<th style="width:50%;" colspan="3">
+							<!-- <lightning:select name="" label="" required="true" value="{!eachReportingRule.ReportingRule}">
+						        <option value="">choose one...</option>
+		                        <aura:iteration items="{!v.reportingRuleOption}" var="eachReportingRuleOption" indexVar="optionIndex">
+		    				        <option value="{!eachReportingRuleOption.value}">{!eachReportingRuleOption.label}</option>
+		                        </aura:iteration>
+					    	</lightning:select> -->
+					    	<lightning:textarea class="label-hidden" name="" label="" placeholder="Description here..." value="{!eachReportingRule.ReportingRuleDescription}" onchange="{!c.onChangeGrading}" disabled="{!v.isReadOnly}"/>
+						</th>
+						<aura:set attribute="else">
+							<th style="width:50%;" colspan="2">
+						    	<lightning:textarea class="label-hidden" name="" label="" placeholder="Description here..." value="{!eachReportingRule.ReportingRuleDescription}" onchange="{!c.onChangeGrading}" disabled="{!v.isReadOnly}"/>
+							</th>
+						</aura:set>
+					</aura:if>
+					<th style="width:25%;">
+						<!--<aura:if isTrue="{!!v.isReadOnly}">
+							<a onclick="{!c.removeReportingRule}" name="{!reportingRuleIndex}">
+		                        <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_x-small" size="small" alternativeText="Delete ReportingRule"/>
+		                        <span class="slds-assistive-text">Delete Icon</span>
+		                    </a>
+						</aura:if>-->
+					</th>
+				</tr>
+				<tr>
+					<th>From</th>
+					<th>To</th>
+					<th>GP</th>
+					<th>Is Include CAM</th>
+					<aura:if isTrue="{!v.oppObject.isGPYearlyTier}">
+						<th>Grading Yearly Tier</th>
+					</aura:if>
+				</tr>
+				<aura:iteration items="{!eachReportingRule.ReportingRuleDetailList}" var="eachReportingRuleDetail" indexVar="reportingRuleDetailIndex">
+					<aura:if isTrue = "{!!eachReportingRuleDetail.isToDeleteRecord}">
+		    			<tr>
+		    				<td><lightning:input class="priceInput label-hidden" type="number" step=".01" name="{!reportingRuleIndex+'_'+reportingRuleDetailIndex}" label="" value="{!eachReportingRuleDetail.rangFrom}" onblur="{!c.onblurNUmberField}" onchange="{!c.onChangeGrading}" disabled="{!v.isReadOnly}"/></td>
+		    				<td><lightning:input class="priceInput label-hidden" type="number" step=".01" name="{!reportingRuleIndex+'_'+reportingRuleDetailIndex}" label="" value="{!eachReportingRuleDetail.rangTo}" onblur="{!c.onblurNUmberField}" onchange="{!c.onChangeGrading}" disabled="{!v.isReadOnly}"/></td>
+		    				<td><lightning:input class="priceInput label-hidden" type="number" step=".01" name="{!reportingRuleIndex+'_'+reportingRuleDetailIndex}" label="" value="{!eachReportingRuleDetail.GPPercent}" onblur="{!c.onblurNUmberField}" onchange="{!c.onChangeGrading}" disabled="{!v.isReadOnly}"/></td>
+		    				<td><lightning:input class="slds-m-vertical_x-small" type="checkbox"  name="" checked="{!eachReportingRuleDetail.IsIncludeCam}" onchange="{!c.onChangeGrading}" disabled="{!v.isReadOnly || v.oppObject.isNoCAM}" /></td>
+		    				<aura:if isTrue="{!v.oppObject.isGPYearlyTier}">
+			    				<td>
+			    					<lightning:select class="label-hidden" name="" label=""  value="{!eachReportingRuleDetail.gpYearlyTier}" onchange="{!c.onChangeGrading}" disabled="{!v.isReadOnly}">
+								        <aura:iteration items="{!v.yearlyTierOption}" var="option">
+								            <option text="{!option.label}" value="{!option.value}"/>
+								        </aura:iteration>
+								    </lightning:select>
+			    				</td>
+		    				</aura:if>
+		    				<td>
+		    					<aura:if isTrue="{!!v.isReadOnly}">
+			    					<a onclick="{!c.removeReportingRuleDetail}" name="{!reportingRuleIndex+'_'+reportingRuleDetailIndex}">
+			                            <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_xx-small" size="small" alternativeText="Delete Row"/>
+			                            <span class="slds-assistive-text">Delete Icon</span>
+			                        </a>
+		    					</aura:if>
+		    				</td>
+		    			</tr>
+					</aura:if>
+				</aura:iteration>
+				<aura:if isTrue="{!not(v.isReadOnly)}">
+					<tr>
+						<td><lightning:button class="slds-float_right" variant="brand" label="Add" title="Add" onclick="{!c.addReportingRuleDetail}" name="{!reportingRuleIndex}" disabled="{!v.isReadOnly}"/></td>
+					</tr>
+				</aura:if>
+			</table>
+		</aura:if>
+	</aura:iteration>
+
+	<p class="slds-text-heading_small">Proportion</p>
+
+    <div class="slds-grid slds-gutters slds-m-vertical_x-small">
+      
+    	<table>
+    		<tr>
+    			<th>Proportion</th>
+    			<th>Rent</th>
+    			<th>Service</th>
+    			<!-- <th>Air Service</th> -->
+    		</tr>
+    		<!-- <aura:iteration items="{!v.eachPeriod.ProportionList}" var="eachProportion" indexVar="proportionIndex"> -->
+    		<tr>
+    			<td>{!v.eachPeriod.Proportion.Proportion}</td>
+    			<td><lightning:input class="slds-size_2-of-3 centerInput label-hidden" type="number" name="" label="" value="{!v.eachPeriod.Proportion.Rent}" step=".01" onchange="{!c.onChangePricing}" onblur="{!c.onBlurProportion}" disabled="{!v.isReadOnly}"/></td>
+    			<td><lightning:input class="slds-size_2-of-3 centerInput label-hidden" type="number" name="" label="" value="{!v.eachPeriod.Proportion.Service}" step=".01" onchange="{!c.onChangePricing}" onblur="{!c.onBlurProportion}" disabled="{!v.isReadOnly}"/></td>
+    			<!-- <td><lightning:input class="slds-size_2-of-3" type="number" name="camEscaltionRate" label="" value="{!eachProportion.AirService}"/></td> -->
+    		</tr>
+    		<!-- </aura:iteration> -->
+    	</table>
+    </div>
+</aura:component>

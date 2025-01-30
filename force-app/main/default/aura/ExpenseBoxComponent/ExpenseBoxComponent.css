@@ -1,0 +1,53 @@
+.THIS table.expensetable {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .THIS td.expensetable{
+    border: 2px solid #666666;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  .THIS th.expensetable{
+    border: 2px solid #666666;
+    background-color: #cccccc;
+    text-align: center;
+    padding: 8px;
+  }
+  
+  .THIS tr.expensetable{
+    background-color: #f2f2f2;
+  }
+  
+  .THIS .label-hidden > label {
+      display: none;
+  }
+  
+  .THIS .priceInput input { 
+    text-align: right !important;
+  }
+  
+  .THIS table.leaseholdTable {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .THIS table.leaseholdTable  th {
+    border: 2px solid #666666;
+    background-color: #cccccc;
+    text-align: center;
+    padding: 8px;
+  }
+  
+  .THIS table.leaseholdTable  td {
+    border: 2px solid #666666;
+    text-align: left;
+    padding: 8px;
+    background-color: #f2f2f2;
+  }
+  
+  .THIS td.priceInput{
+    text-align: right !important;
+  }

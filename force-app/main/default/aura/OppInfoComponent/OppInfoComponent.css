@@ -1,0 +1,22 @@
+.THIS table.detail {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .THIS td.detail {
+    border: 2px solid white !important;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  .THIS th.detail {
+    border: 2px solid white !important;
+    background-color: white !important;
+    text-align: center;
+    padding: 8px;
+  }
+  
+  .THIS tr.detail {
+    background-color: white !important;
+  }

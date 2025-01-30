@@ -1,0 +1,157 @@
+<apex:page standardController="Contract__c" extensions="OppPDFSubPageController" showHeader="false" sidebar="false" standardStylesheets="false"
+    applyBodyTag="false" applyHtmlTag="false">
+
+
+
+    <apex:variable value="{!0}" var="list" />
+    <div class="text-container" style="overflow-wrap: break-word;word-break: break-all;">
+        <!-- <apex:repeat value="{!ContractFeePeriod_Space.rentalRate}" var="rentalRate">
+        <p class="contractWording">ผู้เช่าตกลงที่จะชำระค่าเช่าเป็นรายเดือนให้แก่ผู้ให้เช่าตลอดระยะเวลาการเช่า โดยคู่สัญญาตกลงกันกำหนดค่าเช่า ในอัตราเดือนละ
+
+            <span class="redText">
+                <apex:outputText value="{0,number, ###,###,###.##}">
+                    <apex:param value="{!ContractFeePeriod_Space.rentalRate[list]}" />
+                </apex:outputText>
+            </span>
+            บาท
+            <span>(xxxxxxxxxxxx) </span> ต่อ 1 (หนึ่ง) ตารางเมตร คิดเป็นเงินค่าเช่าเดือนละ
+            <span class="redText">
+                <apex:outputText value="{0,number, ###,###,###.##}">
+                    <apex:param value="{!ContractFeePeriod_Space.rentalFee[list]}" />
+                </apex:outputText>
+            </span>
+            บาท
+            <span class="redText">(xxxxxxxxxxxxxxxxx)</span>
+        </p>
+        <apex:variable value="{!list+1}" var="list" />
+    </apex:repeat> -->
+
+        <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize == 0}">
+            <p class="contractWording">
+                <span style="font-size:16px;">สัญญานี้ไม่มีห้องผูก</span>
+            </p>
+        </apex:outputText>
+        <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize > 0}">
+            <p class="contractWording">
+                <span style="font-size:16px;">ผู้เช่าตกลงที่จะชำระค่าเช่าเป็นรายเดือนให้แก่ผู้ให้เช่าตลอดระยะเวลาการเช่า โดยคู่สัญญาตกลงกัน กำหนดค่าเช่า
+                    มีรายละเอียดดังต่อไปนี้
+                </span>
+            </p>
+            <apex:repeat value="{!ContractFeePeriod_Space.rentalUnit}" var="unit">
+                <apex:outputText rendered="{!ContractFeePeriod_Space.unitIsFOC[unit]}">
+                    <p class="contractWording"> ห้องเลขที่ {!unit}
+                        <p class="contractFeeSubWording">- มีขนาดพื้นที่
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!ContractFeePeriod_Space.measurementArea[unit]}" />
+                            </apex:outputText> ตารางเมตร เป็นพื้นที่ประเภท Free of Charge
+                        </p>
+                    </p>
+                </apex:outputText>
+                <apex:outputText rendered="{!(!contractTypeGP) || Contract__c.Calculation_Method__c = 'GP on Top'}">
+                    <apex:outputText rendered="{!(!ContractFeePeriod_Space.unitIsFOC[unit])}">
+                        <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize > 1}">
+                            <p class="contractWording">
+                                <span style="font-size:16px;"> ห้องเลขที่ {!unit}</span>
+                            </p>
+                        </apex:outputText>
+                        <apex:repeat value="{!ContractFeePeriod_Space.unitDataWithPeriod[unit]}" var="period">
+                            <p class="contractFeeSubWording">
+                                <span style="font-size:16px;">- อัตราค่าเช่า ปีที่ {!ContractFeePeriod_Space.periodYear[period.Id]} กำหนดค่าเช่าในอัตราเดือนละ
+                                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                                        <apex:param value="{!ContractFeePeriod_Space.rentFeePerSQM[unit][period.Id]}" />
+                                    </apex:outputText>
+                                    <!-- <apex:outputText rendered="{!period.MinType__c = 'Fixed'}" value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!ContractFeePeriod_Space.fixedRentFeePerSQMText[period.Id]}" />
+                            </apex:outputText> -->
+                                    บาท ({!ContractFeePeriod_Space.rentFeePerSQMText[unit][period.Id]}) ต่อ 1 (หนึ่ง) ตารางเมตร คิดเป็นเงินค่าเช่าเดือนละ
+                                    <apex:outputText rendered="{!period.MinType__c = 'Measurement'}" value="{0,number, ###,###,##0.00}">
+                                        <apex:param value="{!ContractFeePeriod_Space.leasableRentalMonth[unit][period.Id]}" />
+                                    </apex:outputText>
+                                    <apex:outputText rendered="{!period.MinType__c = 'Fixed'}" value="{0,number, ###,###,##0.00}">
+                                        <apex:param value="{!ContractFeePeriod_Space.fixedTotalRent[unit][period.Id]}" />
+                                    </apex:outputText>
+                                    บาท
+                                    <apex:outputText rendered="{!period.MinType__c = 'Measurement'}">
+                                        ({!ContractFeePeriod_Space.totalRentText[unit][period.Id]})
+                                    </apex:outputText>
+                                    <apex:outputText rendered="{!period.MinType__c = 'Fixed'}">
+                                        ({!ContractFeePeriod_Space.fixedTotalRentText[unit][period.Id]})
+                                    </apex:outputText>
+                                </span>
+                            </p>
+                        </apex:repeat>
+                    </apex:outputText>
+                </apex:outputText>
+
+
+                <apex:outputText rendered="{!contractTypeGP}">
+                    <apex:outputText rendered="{!(!ContractFeePeriod_Space.unitIsFOC[unit])}">
+                        <apex:repeat value="{!ContractFeePeriod_Space.unitDataWithPeriod[unit]}" var="period">
+                            <apex:outputText rendered="{!IF(AND(GPPercentage != null, GPPriceEnd != null),true,false)}">
+                                <p class="contractFeeSubWording">
+                                    <span style="font-size:16px;">
+                                        - ปีที่ {!ContractFeePeriod_Space.periodYear[period.Id]} พื้นที่ {!unit} ขนาด {!ContractFeePeriod_Space.measurementArea[unit]}
+                                        ตารางเมตร คิดค่าเช่าในอัตรา GP {!GPPercentage}% คิดตั้งแต่บาทแรก
+                                        <apex:outputText rendered="{!GPPriceEnd = 0}">ขึ้นไป</apex:outputText>
+                                        <apex:outputText rendered="{!GPPriceEnd != 0}">
+                                            ถึง
+                                            <apex:outputText value="{0,number, ###,###,###,##0.00}">
+                                                <apex:param value="{!GPPriceEnd}" />
+                                            </apex:outputText>
+                                            บาท (ยอดขายก่อนภาษีมูลค่าเพิ่ม)
+                                        </apex:outputText>
+
+                                    </span>
+                                </p>
+                            </apex:outputText>
+                            <apex:outputText rendered="{!GPPercentage == null}">
+                                <!-- <apex:repeat value="{!oppPeriodId}" var="PeriodId"> -->
+                                <apex:repeat value="{!GPByOppPeriod[period.Id]}" var="GPStep">
+                                    <p class="contractFeeSubWording">
+                                        <span style="font-size:16px;">
+                                            - ปีที่ {!ContractFeePeriod_Space.periodYear[period.Id]} พื้นที่ {!unit} ขนาด {!ContractFeePeriod_Space.measurementArea[unit]}
+                                            ตารางเมตร คิดค่าเช่าในอัตรา GP {!GPStep.GP}%
+                                            <apex:outputText rendered="{!GPStep.FromR == 0}">
+                                                คิดตั้งแต่บาทแรก
+                                                <apex:outputText rendered="{!GPStep.ToR == 0}">ขึ้นไป</apex:outputText>
+                                                <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                                    ถึง
+                                                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                        <apex:param value="{!GPStep.ToR}" />
+                                                    </apex:outputText> บาท
+                                                </apex:outputText>
+                                            </apex:outputText>
+                                            <apex:outputText rendered="{!GPStep.FromR != 0}">
+                                                คิดตั้งแต่
+                                                <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                    <apex:param value="{!GPStep.FromR}" />
+                                                </apex:outputText> บาท
+                                                <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                                    ถึง
+                                                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                        <apex:param value="{!GPStep.ToR}" />
+                                                    </apex:outputText> บาท
+                                                </apex:outputText>
+                                                <apex:outputText rendered="{!GPStep.ToR == 0}">
+                                                    ขึ้นไป
+                                                </apex:outputText>
+                                            </apex:outputText>
+                                            (ยอดขายก่อนภาษีมูลค่าเพิ่ม)
+                                        </span>
+                                    </p>
+                                </apex:repeat>
+                                <!-- </apex:repeat> -->
+                            </apex:outputText>
+                        </apex:repeat>
+                    </apex:outputText>
+                </apex:outputText>
+            </apex:repeat>
+        </apex:outputText>
+    </div>
+</apex:page>
+
+<!-- GP -->
+<!-- ปีที่ 1  พื้นที่ A109  ขนาด 94 ตารางเมตร  คิดค่าเช่าในอัตรา GP 11% คิดตั้งแต่ 1 บาทแรก ไม่มีขั้นต่ำ     (ยอดขายก่อนภาษีมูลค่าเพิ่ม)
+ปีที่ 2 – 3    พื้นที่ A109  ขนาด 94 ตารางเมตร  กรณียอดขายสินค้ามากกว่าหรือเท่ากับ 500,000 บาทต่อเดือน  
+คิดค่าเช่าในอัตรา  GP 12%  (ยอดขายก่อนภาษีมูลค่าเพิ่ม)
+ -->

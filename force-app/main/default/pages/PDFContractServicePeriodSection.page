@@ -1,0 +1,43 @@
+<apex:page standardController="Contract__c" extensions="OppPDFSubPageController" showHeader="false" sidebar="false" standardStylesheets="false"
+    applyBodyTag="false" applyHtmlTag="false">
+    <div class="text-container">
+
+        <p class="contractWording">
+            <span class="contractWording" style="font-size:16px;">สัญญาบริการนี้
+                <!-- apex outputtext check for multiple room -->
+                <!-- <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize == 1}">
+                    <span style="text-align:justify;">มีระยะเวลาทั้งสิ้น {!Contract__c.Rental_Period_for_Document__c} โดยเริ่มต้นและสิ้นสุดสัญญาเท่ากับระยะเวลาการเช่าของ
+                        สัญญาเช่า และให้ถือว่าสัญญาบริการฉบับนี้เป็นส่วนหนึ่งของสัญญาเช่า ดังนั้นในกรณี ที่สัญญาเช่าสิ้นสุด
+                        ลงไม่ว่าด้วยเหตุใดๆก็ตาม ให้ถือว่าสัญญาบริการฉบับนี้สิ้นสุดลงด้วย</span>
+                </apex:outputText>
+                <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize > 1}"> -->
+                <apex:variable value="{!1}" var="list" />
+                <apex:repeat value="{!ContractFeePeriod_Space.rentalUnit}" var="unit">
+                    <p class="contractSubWording">
+                        - ห้องเลขที่ {!unit} มีระยะเวลาทั้งสิ้น {!Contract__c.Rental_Period_for_Document__c}
+                        <apex:outputText rendered="{!list < ContractFeePeriod_Space.unitListSize}">
+                            และ
+                            <apex:variable value="{!list+1}" var="list" />
+                        </apex:outputText>
+                    </p>
+                </apex:repeat>
+                <apex:outputText rendered="{!Contract__c.Rental_Type__c = 'Space_Rental'}">
+                    <p class="contractWording" style="text-align:justify;">
+                        โดยเริ่มต้นและสิ้นสุดสัญญาเท่ากับระยะเวลาการเช่าของสัญญาเช่า และให้ถือว่าสัญญาบริการฉบับนี้ เป็นส่วนหนึ่งของสัญญาเช่าดังนั้น
+                        ในกรณีที่สัญญาเช่า สิ้นสุดลง ไม่ว่าด้วยเหตุใดๆ ก็ตาม ให้ถือว่า สัญญา บริการฉบับนี้สิ้นสุดลงด้วย
+                    </p>
+                </apex:outputText>
+                <apex:outputText rendered="{!Contract__c.Rental_Type__c = 'OP_Rental'}">
+                    <p class="contractWording">
+                        โดยเริ่มนับตั้งแต่วันที่ {!Contract__c.Contract_Start_Date_for_Document__c} - {!Contract__c.Contract_End_Date_for_Document__c}
+                    </p>
+                </apex:outputText>
+                <!-- </apex:outputText> -->
+
+            </span>
+        </p>
+        <!-- End -->
+    </div>
+</apex:page>
+
+<!-- ระยะเวลาการเช่าตามสัญญานี้ มีระยะเวลาทั้งสิ้น {FIELD:Rental_Period_for_Document__c} โดยเริ่มนับตั้งแต่วันที่ {FIELD:Contract_Start_Date_for_Document__c} ถึงวันที่ {FIELD:Contract_End_Date_for_Document__c} -->

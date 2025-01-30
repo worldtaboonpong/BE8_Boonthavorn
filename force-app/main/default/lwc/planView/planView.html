@@ -1,0 +1,13 @@
+<template>
+    <template if:true={floorListLoaded}>
+        <c-lookup onsearch={handleSearch} onselectionchange={handleSelectionChange} label="Floor"
+            placeholder="Search Floor"></c-lookup>
+        <template if:true={showPlanViewEmptyState}>
+            <c-empty-state-maintenance label={emptyStateLabel}></c-empty-state-maintenance>
+        </template>
+        <div class="slds-align_absolute-center ">
+            <canvas id="planImage" style="width:100%;display:block;">Your browser does not support HTML5 Canvas</canvas>
+        </div>
+        <c-unit-modal unit={currentUnitModal}></c-unit-modal>
+    </template>
+</template>
