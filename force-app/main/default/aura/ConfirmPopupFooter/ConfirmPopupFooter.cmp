@@ -1,0 +1,6 @@
+<aura:component>
+	<lightning:overlayLibrary aura:id="confirmOverlay"/>
+	<aura:attribute name="isConfirmRemove" type="Boolean"/>
+    <lightning:button name="" label="No" variant="destructive" onclick="{!c.cancelAction}"/>	
+    <lightning:button name="" label="Yes" variant="brand" onclick="{!c.confirmAction}"/>
+</aura:component>

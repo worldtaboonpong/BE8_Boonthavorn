@@ -1,0 +1,7 @@
+.THIS .label-hidden > label {
+    display: none;
+}
+
+.THIS .priceInput input { 
+    text-align: right !important;
+}

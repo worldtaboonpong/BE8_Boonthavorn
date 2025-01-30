@@ -1,0 +1,32 @@
+<aura:component access="global" controller="QuotationPrepController">
+
+	<aura:attribute name="optionToparent" type="String"/>
+	<aura:attribute name="optionValue" type="String"/>
+	<aura:attribute name="disabledButtom" type="Boolean" default="true"/>
+    <aura:attribute name="otherExpenseOption" type="List" default="[]"/>
+
+    <aura:attribute name="options" type="List" default="[]"/>
+
+    <lightning:overlayLibrary aura:id="addOtherExpenseOverLey"/>
+
+    <div class="slds-box slds-box_small slds-theme_shade">
+
+	     <lightning:radioGroup name="usageTypeGroup"
+	                          label="Other Expennse Type"
+	                          options="{! v.options }"
+	                          value="{! v.optionValue }"
+	                          type="radio"
+	                          onchange = "{!c.changeOption}"/>
+    </div>
+
+    <div class="slds-grid slds-gutters slds-m-top_small">
+    	<div class="slds-col slds-align_absolute-center">
+			<lightning:button  label="Add" iconName="utility:add" iconPosition="right" variant="brand" onclick="{!c.addOtherExpense}" disabled = "{!v.disabledButtom}"/>
+    	</div>
+
+    	<div class="slds-col slds-align_absolute-center">
+			<lightning:button  label="Cancel" iconName="utility:close" iconPosition="right" variant="destructive" onclick="{!c.cancelAddOtherExpense}"/>
+    	</div>
+    </div>
+
+</aura:component>

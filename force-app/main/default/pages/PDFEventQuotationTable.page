@@ -1,0 +1,489 @@
+<apex:page standardController="Opportunity" extensions="OppPDFSubPageController" action="{!updatedData}" showHeader="false"
+    sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false">
+
+
+    <apex:variable value="{!1}" var="sequenceNumber" />
+
+    <div class="quotationTable">
+        <table width="100%">
+            <tr>
+                <td class="header-one">ลำดับที่
+                    <br/> No.</td>
+                <td class="header-two">รายการ
+                    <br/> Description</td>
+                <td class="header-three">ขนาดพื้นที่
+                    <br/> Measurement </td>
+                <td class="header-four">หน่วย
+                    <br/> Unit </td>
+                <td class="header-five"> ราคา/หน่วย
+                    <br/> Unit Cost (Baht)</td>
+                <td class="header-six"> จำนวนเงิน (เงินบาท)
+                    <br/> Amount (Baht) </td>
+            </tr>
+            <tr>
+                <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                <td class="mainContent description">
+                    ค่าบริการพื้นที่ Event:
+                    <apex:outputText rendered="{!EventOppData.unitList.size!=0}">
+                        <apex:repeat value="{!EventOppData.unitList}" var="unitList">
+                            <span class='unitNo'>
+                                <br/> &nbsp; - Unit No. {!unitList} (ระยะ Period {!EventOppData.quantity} เดือน)</span>
+                        </apex:repeat>
+                    </apex:outputText>
+                    <apex:outputText rendered="{!EventOppData.unitList.size == 0}">
+                        <br/> &nbsp; - Unit No.{!Opportunity.RoomNumber__c} (ระยะ Period
+                        <apex:outputText rendered="{!Opportunity.Rental_Period_Month__c != 0}">
+                            <apex:outputText value="{0,number, #}">
+                                <apex:param value="{!Opportunity.Rental_Period_Month__c}" />
+                            </apex:outputText>
+                            เดือน
+                        </apex:outputText>
+                        <apex:outputText rendered="{!Opportunity.Rental_Period_Day__c != 0}">
+                            <apex:outputText value="{0,number, #}">
+                                <apex:param value="{!Opportunity.Rental_Period_Day__c}" />
+                            </apex:outputText>
+                            วัน
+                        </apex:outputText>
+                        )
+                    </apex:outputText>
+                </td>
+                <td class="mainContent number">
+                    <apex:outputText rendered="{!Opportunity.Contract_Type__c != 'Short-Term GP Rent'}">
+                        <apex:repeat value="{!EventOppData.unitSize}" var="unitSize">
+                            <br/>
+                            <span class="subText">
+                                <apex:outputText value="{0,number, ###,###,##0.00}">
+                                    <apex:param value="{!unitSize}" />
+                                </apex:outputText>
+                            </span>
+                        </apex:repeat>
+                    </apex:outputText>
+                    <apex:outputText rendered="{!Opportunity.Contract_Type__c == 'Short-Term GP Rent'}">
+                        <br/>
+                        <span class="subText">
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!Opportunity.Total_Area_sq_m__c}" />
+                            </apex:outputText>
+                        </span>
+                    </apex:outputText>
+                </td>
+                <td class="mainContent number">
+                    <apex:repeat value="{!EventOppData.unitList}" var="unit">
+                        <br/>
+                        <span class="subText">sq.m</span>
+                    </apex:repeat>
+                </td>
+                <td class="mainContent number">
+                    <apex:repeat value="{!EventOppData.pricePerUnit}" var="pricePerUnit">
+                        <br/>
+                        <span class="subText">
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!pricePerUnit}" />
+                            </apex:outputText>
+                        </span>
+                    </apex:repeat>
+                </td>
+                <td class="mainContent number">
+                    <apex:repeat value="{!EventOppData.totalAmount}" var="totalAmount">
+                        <br/>
+                        <span class="subText">
+                            <apex:outputText rendered="{!totalAmount != 0}" value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!totalAmount}" />
+                            </apex:outputText>
+                        </span>
+                    </apex:repeat>
+                </td>
+            </tr>
+
+            <apex:outputText rendered="{!opportunity.Contract_Type__c == 'Short-Term GP Rent'}">
+                <tr>
+
+                    <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+
+                    <td class="mainContent description">
+                        ส่วนแบ่งรายได้จากยอดขายก่อนหักค่าใช้จ่าย (ไม่รวมภาษีมูลค่าเพิ่ม)
+                        <br/>โดยทางบริษัทฯยินดีจ่ายส่วนแบ่งรายได้จากยอดขายให้กับทางโครงการ ดังนี้
+                        <apex:outputText rendered="{!IF(AND(GPPercentage != null, GPPriceEnd != null),true,false)}">
+                            <br/> &nbsp; - ยอดขายตั้งแต่บาทแรก
+                            <apex:outputText rendered="{!GPPriceEnd != 0}">
+                                ถึง
+                                <apex:outputText value="{0,number, ###,###,###,##0.00}">
+                                    <apex:param value="{!GPPriceEnd}" />
+                                </apex:outputText>
+                                บาท
+                            </apex:outputText>
+                            <apex:outputText rendered="{!GPPriceEnd = 0}">
+                                ขึ้นไป
+                            </apex:outputText>
+                            ส่วนแบ่ง {!GPPercentage}%
+                        </apex:outputText>
+                        <apex:outputText rendered="{!GPPercentage = null}">
+                            <apex:repeat value="{!oppPeriodId}" var="oppPeriodId">
+                                <apex:repeat value="{!GPByOppPeriod[oppPeriodId]}" var="GPStep">
+                                    <br/> &nbsp; - ยอดขาย
+                                    <apex:outputText rendered="{!GPStep.FromR == 0}">
+                                        ตั้งแต่บาทแรก
+                                        <apex:outputText rendered="{!GPStep.ToR == 0}">ขึ้นไป</apex:outputText>
+                                        <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                            ถึง
+                                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                <apex:param value="{!GPStep.ToR}" />
+                                            </apex:outputText> บาท
+                                        </apex:outputText>
+                                    </apex:outputText>
+                                    <apex:outputText rendered="{!GPStep.FromR != 0}">
+                                        คิดตั้งแต่
+                                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                                            <apex:param value="{!GPStep.FromR}" />
+                                        </apex:outputText> บาท
+                                        <apex:outputText rendered="{!GPStep.ToR != 0}">
+                                            ถึง
+                                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                                <apex:param value="{!GPStep.ToR}" />
+                                            </apex:outputText> บาท
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!GPStep.ToR == 0}">
+                                            ขึ้นไป
+                                        </apex:outputText>
+                                    </apex:outputText>
+                                    ส่วนแบ่ง {!GPStep.GP}%
+                                </apex:repeat>
+                            </apex:repeat>
+                        </apex:outputText>
+                    </td>
+                    <td class="mainContent number"></td>
+                    <td class="mainContent number"></td>
+                    <td class="mainContent number"></td>
+                    <td class="mainContent number"></td>
+                </tr>
+            </apex:outputText>
+
+
+            <apex:outputText rendered="{!EventOppData.containExpenseList}">
+                <tr>
+                    <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+
+                    <td class="mainContent description">
+                        ค่าใช้จ่ายอื่นๆ:
+                    </td>
+                    <td class="mainContent number"></td>
+                    <td class="mainContent number"></td>
+                    <td class="mainContent number"></td>
+                    <td class="mainContent number"></td>
+                </tr>
+                <!-- ค่าน้ำ -->
+                <apex:outputText rendered="{!EventOppData.waterPrice != null || EventOppData.waterRate != null}">
+                    <tr>
+                        <td class="mainContent running-sequence"></td>
+                        <td class="mainContent description"> &nbsp; - ค่าน้ำ</td>
+                        <td class="mainContent number">
+                            <apex:outputText rendered="{!EventOppData.waterFeeType == 'Fixed Price'}">
+
+                                <span class="unit"> 1 </span>
+                            </apex:outputText>
+                        </td>
+                        <td class="mainContent number">
+                            <apex:outputText rendered="{!EventOppData.waterFeeType == 'Fixed Price'}">
+
+                                <span class="unit"> ครั้ง </span>
+                            </apex:outputText>
+                        </td>
+                        <td class="mainContent number">
+                            <apex:outputText rendered="{!EventOppData.waterFeeType != 'Fixed Price'}">
+
+                                <span class="subText"> {!EventOppData.waterRate} </span>
+                            </apex:outputText>
+                        </td>
+                        <td class="mainContent number">
+                            <apex:outputText rendered="{!IF(AND(EventOppData.waterPrice != null , EventOppData.waterFeeType == 'Fixed Price'),true,false)}">
+
+                                <span class="subText">
+                                    <apex:outputText value="{0,number, ###,###,###,##0.00}">
+                                        <apex:param value="{!EventOppData.totalWater}" />
+                                    </apex:outputText>
+                                </span>
+                            </apex:outputText>
+                        </td>
+                    </tr>
+                </apex:outputText>
+
+                <!-- ค่าไฟ -->
+                <apex:outputText rendered="{!EventOppData.elecPrice != null || EventOppData.elecRate != null}">
+                    <tr>
+                        <td class="mainContent running-sequence"></td>
+                        <td class="mainContent description"> &nbsp; - ค่าไฟ</td>
+                        <td class="mainContent number">
+                            <apex:outputText rendered="{!EventOppData.elecFeeType == 'Fixed Price'}">
+
+                                <span class="unit"> 1 </span>
+                            </apex:outputText>
+                        </td>
+                        <td class="mainContent number">
+                            <apex:outputText rendered="{!EventOppData.elecFeeType == 'Fixed Price'}">
+
+                                <span class="unit"> ครั้ง </span>
+                            </apex:outputText>
+                        </td>
+                        <td class="mainContent number">
+                            <apex:outputText rendered="{!EventOppData.elecFeeType != 'Fixed Price'}">
+
+                                <span class="subText"> {!EventOppData.elecRate} </span>
+                            </apex:outputText>
+                        </td>
+                        <td class="mainContent number">
+                            <apex:outputText rendered="{!IF(AND(EventOppData.elecPrice != null , EventOppData.elecFeeType == 'Fixed Price'),true,false)}">
+
+                                <span class="subText">
+                                    <apex:outputText value="{0,number, ###,###,###,##0.00}">
+                                        <apex:param value="{!EventOppData.totalElec}" />
+                                    </apex:outputText>
+                                </span>
+                            </apex:outputText>
+                        </td>
+                    </tr>
+                </apex:outputText>
+
+                <!-- Additional Exepense -->
+                <apex:outputText rendered="{!IF(AND(EventOppData.additionalFee != null, EventOppData.additionalFee != 0),true,false)}">
+                    <tr>
+                        <td class="mainContent running-sequence"></td>
+                        <td class="mainContent description"> &nbsp; - {!EventOppData.additionalRemark}</td>
+                        <td class="mainContent number">
+                            <span class="unit"> 1 </span>
+
+                        </td>
+
+                        <td class="mainContent number">
+                            <span class="unit"> ครั้ง </span>
+                        </td>
+
+                        <td class="mainContent number"></td>
+
+                        <td class="mainContent number">
+                            <apex:outputText rendered="{!EventOppData.additionalFee != null }">
+
+                                <span class="subText">
+                                    <apex:outputText value="{0,number, ###,###,###,##0.00}">
+                                        <apex:param value="{!EventOppData.additionalFee}" />
+                                    </apex:outputText>
+                                </span>
+                            </apex:outputText>
+                        </td>
+                    </tr>
+                </apex:outputText>
+
+                <!-- Other Expenses -->
+                <apex:variable value="{!0}" var="list" />
+                <apex:outputText rendered="{!EventOppData.DepositExpenseType != null}">
+                    <apex:repeat value="{!EventOppData.DepositExpenseType}" var="ExpenseType">
+                        <tr>
+                            <td class="mainContent running-sequence"></td>
+                            <td class="mainContent description"> &nbsp; - {!ExpenseType}</td>
+                            <td class="mainContent number">
+                                <span class="subText"> 1 </span>
+
+                            </td>
+
+                            <td class="mainContent number">
+                                <span class="unit"> ครั้ง </span>
+                            </td>
+
+                            <td class="mainContent number"></td>
+
+                            <td class="mainContent number">
+                                <apex:outputText rendered="{!EventOppData.DepositExpensePrice != null }">
+
+                                    <span class="subText">
+                                        <apex:outputText value="{0,number, ###,###,###,##0.00}">
+                                            <apex:param value="{!EventOppData.DepositExpensePrice[list]}" />
+                                        </apex:outputText>
+                                    </span>
+                                </apex:outputText>
+                            </td>
+                        </tr>
+                        <apex:variable value="{!list+1}" var="list" />
+                    </apex:repeat>
+                </apex:outputText>
+            </apex:outputText>
+            <!-- <br/>
+                <span class="subText"> &nbsp; - ค่าน้ำ </span>
+            </apex:outputText>
+            <apex:outputText rendered="{!EventOppData.elecFee != null}">
+                <br/>
+                <span class="subText"> &nbsp; - ค่าไฟ </span>
+            </apex:outputText>
+            <apex:outputText rendered="{!EventOppData.additionalFee != null}">
+                <br/>
+                <span class="subText"> &nbsp; - Additional Request </span>
+            </apex:outputText>
+            <apex:outputText rendered="{!EventOppData.DepositExpenseType != null}">
+                <apex:repeat value="{!EventOppData.DepositExpenseType}" var="ExpenseType">
+                    <br/>
+                    <span class="subText"> &nbsp; - {!ExpenseType} </span>
+                </apex:repeat>
+            </apex:outputText>
+            </td>
+            <td class="mainContent number">
+                <apex:outputText rendered="{!EventOppData.waterFeeType == 'Fixed Price'}">
+                    <br/>
+                    <span class="subText"> 1 </span>
+                </apex:outputText>
+                <apex:outputText rendered="{!EventOppData.waterFee == 'Fixed Price'}">
+                    <br/>
+                    <span class="subText"> 1 </span>
+                </apex:outputText>
+                <apex:outputText rendered="{!EventOppData.waterFee == 'Fixed Price'}">
+                    <br/>
+                    <span class="subText"> 1 </span>
+                </apex:outputText>
+                <apex:outputText rendered="{!EventOppData.DepositExpensePrice != null}">
+                    <apex:repeat value="{!EventOppData.DepositExpensePrice}" var="ExpensePrice">
+                        <br/>
+                        <span class="subText"> 1 </span>
+                    </apex:repeat>
+                </apex:outputText>
+            </td>
+            <td class="mainContent number"></td>
+            <td class="mainContent number">
+                
+            </td>
+            <td class="mainContent number">
+                <apex:outputText rendered="{!EventOppData.waterFee != null}">
+                    <br/>
+                    <span class="subText">
+                        <apex:outputText value="{0,number, ###,###,###,##0.00}">
+                            <apex:param value="{!EventOppData.waterFee}" />
+                        </apex:outputText>
+                    </span>
+                </apex:outputText>
+
+                <apex:outputText rendered="{!EventOppData.elecFee != null}">
+                    <br/>
+                    <span class="subText">
+                        <apex:outputText value="{0,number, ###,###,###,##0.00}">
+                            <apex:param value="{!EventOppData.elecFee}" />
+                        </apex:outputText>
+                    </span>
+                </apex:outputText>
+
+                <apex:outputText rendered="{!EventOppData.additionalFee != null}">
+                    <br/>
+                    <span class="subText">
+                        <apex:outputText value="{0,number, ###,###,###,##0.00}">
+                            <apex:param value="{!EventOppData.additionalFee}" />
+                        </apex:outputText>
+                    </span>
+                </apex:outputText>
+
+                <apex:outputText rendered="{!EventOppData.DepositExpensePrice != null}">
+                    <apex:repeat value="{!EventOppData.DepositExpensePrice}" var="ExpensePrice">
+                        <br/>
+                        <span class="subText">
+                            <apex:outputText value="{0,number, ###,###,###,##0.00}">
+                                <apex:param value="{!ExpensePrice}" />
+                            </apex:outputText>
+                        </span>
+                    </apex:repeat>
+                </apex:outputText>
+
+
+            </td>
+            </tr> -->
+            <!-- Deposit_Amount_THB__c -->
+            <!-- Deposit_Month__c -->
+            <tr>
+                <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+
+                <td class="mainContent description">เงินประกันสัญญา</td>
+                <td class="mainContent number">{!1}</td>
+                <td class="mainContent number"> ครั้ง </td>
+                <td class="mainContent number"></td>
+                <td class="mainContent number">
+                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                        <apex:param value="{!opportunity.Deposit_Amount_for_Event__c}" />
+                        <!-- {!opportunity.Decoration_Insurance_Amount__c}</td> -->
+                    </apex:outputText>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+
+                <td class="mainContent description">เงินประกันตกแต่งอีเวนท์</td>
+                <td class="mainContent number">{!1}</td>
+                <td class="mainContent number"> ครั้ง </td>
+                <td class="mainContent number"></td>
+                <td class="mainContent number">
+                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                        <apex:param value="{!opportunity.Decoration_Insurance_Amount__c}" />
+                        <!-- {!opportunity.Decoration_Insurance_Amount__c}</td> -->
+                    </apex:outputText>
+                </td>
+            </tr>
+            <apex:outputText rendered="{!IF(AND(decoInsuranceDiscount != null , decoInsuranceDiscount != 0),true,false)}">
+                <tr>
+                    <td class="mainContent running-sequence"> {!sequenceNumber} </td>
+                    <apex:variable value="{!sequenceNumber+1}" var="sequenceNumber" />
+                    <td class="mainContent description">ส่วนลดเงินประกันตกแต่งอีเวนท์</td>
+                    <td class="mainContent number">{!1}</td>
+                    <td class="mainContent number"> ครั้ง </td>
+                    <td class="mainContent number"></td>
+                    <td class="mainContent number">
+                        -
+                        <apex:outputText value="{0,number, ###,###,##0.00}">
+                            <apex:param value="{!opportunity.Decoration_Insurance_Discount__c}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:outputText>
+
+            <!-- Footer -->
+            <tr>
+                <td colspan="5" class="footer-one">
+                    จำนวนเงินรวม
+                </td>
+                <td class="footer number">
+                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                        <apex:param value="{!EventOppData.total}" />
+                        <!-- {!total} -->
+                    </apex:outputText>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" class="footer-one">
+                    ภาษีมูลค่าเพิ่ม
+                </td>
+                <td class="footer number">
+                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                        <apex:param value="{!EventOppData.vat}" />
+                        <!-- {!vat7} -->
+                    </apex:outputText>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" class="footer-two">
+                    {!EventOppData.grandTotalText}
+                </td>
+                <td class="footer number">
+                    จำนวนเงินทั้งสิ้น
+                </td>
+                <td class="footer number">
+                    <apex:outputText value="{0,number, ###,###,##0.00}">
+                        <apex:param value="{!EventOppData.grandTotal}" />
+                        <!-- {!grandTotal} -->
+                    </apex:outputText>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+
+
+</apex:page>
+
+<!-- เงินประกันสัญญา -->

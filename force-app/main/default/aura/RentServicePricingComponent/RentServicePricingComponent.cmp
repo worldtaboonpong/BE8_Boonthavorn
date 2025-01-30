@@ -1,0 +1,62 @@
+<aura:component access="global" controller="QuotationPrepController">
+
+	<aura:handler name="init" value="{! this }" action="{! c.init }"/>
+	<aura:attribute name="oppObject" type="Object" default="{}"/>
+	<aura:attribute name="rentServicePricing" type="Object" default="{}"/>
+	<aura:attribute name="rentServiceType" type="String" />
+	<aura:attribute name="isSelectRentServiceEscalation" type="Boolean"/>
+	<aura:attribute name="isSelectRenServiceAdvance" type="Boolean" />
+	<aura:attribute name="isInitialPageWithRentService" type="Boolean" default="false"/>
+	<aura:attribute name="isInitialPageWithPeriod" type="Boolean" default="false"/>
+
+	<aura:attribute name="isChangePricing" type="Boolean" default="false" />
+	<aura:attribute name="isReadOnly" type="Boolean" default="false" />
+	<aura:registerEvent name="RenstServiceFixMeaurement" type="c:RentServiceFixMeasurementCustomeEvent"/> 
+	<aura:registerEvent name="RegenerateRentServiceEvent" type="c:RentServiceEvent"/> 
+	<aura:attribute name="isEditPricing" type="Boolean" default="false" />
+
+
+	<div class="slds-box slds-box_x-small slds-theme_shade">
+		<h1 class="slds-text-heading_medium">Rent and Service Escalation</h1>
+	</div>
+
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+	  <div class="slds-col slds-size_1-of-2">
+		
+		<ui:inputRadio aura:id="% Escalation" name="rentServiceType" label="% Escalation" change="{!c.oncChangeRentServiceTypeGroup}" value="{!v.isSelectRentServiceEscalation}" disabled="{!v.isReadOnly}"/>
+		
+		<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+			<div class="slds-col slds-size_1-of-2">
+				<p class="slds-m-vertical_x-small">Rent and Service Escalation Rate</p>
+			</div>
+			<div class="slds-col slds-size_1-of-2">
+				<lightning:input class="slds-size_2-of-3 label-hidden" type="number" name="camEscaltionRate" value="{!v.rentServicePricing.RentServiceEscalationRate.value}" disabled = "{!v.isReadOnly?v.isReadOnly:v.rentServicePricing.RentServiceEscalationRate.IsDisabled}" onchange="{!c.onChangeMeasurementPrice}"/>
+			</div>
+		</div>
+	    <!-- <p class="slds-m-vertical_small slds-align_absolute-center slds-text-heading_small ">Building</p> -->
+	  </div>
+	  <div class="slds-col slds-size_1-of-2">
+
+   		<ui:inputRadio aura:id="Advance" name="rentServiceType" label="Advance" change="{!c.oncChangeRentServiceTypeGroup}" value="{!v.isSelectRenServiceAdvance}" disabled="{!v.isReadOnly}"/>
+	    <!-- <p class="slds-m-vertical_small slds-align_absolute-center slds-text-heading_small">Mock Data</p>-->
+	  </div>
+	</div>
+	
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+		<table>
+			<tr>
+			    <th>Measurement</th>
+			    <th>Price (THB/Sq.M)</th>
+			</tr>
+			<aura:iteration items="{!v.rentServicePricing.RentServiceMeasurment}" var="restServiceMeasurment">
+				<aura:if isTrue="{!!restServiceMeasurment.isToDeleteRecord}">
+					<tr>
+						<td>{!restServiceMeasurment.MeasurementType}</td>
+						<td><lightning:input class="slds-size_2-of-3 priceInput label-hidden" step=".01" type="number" name="restServiceMeasurmentPrice" value="{!restServiceMeasurment.Price.value}" disabled = "{!v.isReadOnly?v.isReadOnly:restServiceMeasurment.Price.IsDisabled}" onchange="{!c.onChangeMeasurementPrice}" min="1"/></td>
+					</tr>
+				</aura:if>
+			</aura:iteration>
+		</table>
+	</div>
+
+</aura:component>

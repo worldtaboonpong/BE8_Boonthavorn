@@ -1,0 +1,176 @@
+<aura:component access="global" controller="QuotationPrepController">
+    <aura:handler name="init" value="{! this }" action="{! c.init }"/>
+	<aura:attribute name="eachPeriod" type="Object" default="{}"  access="public"/>
+	<aura:attribute name="rentServiceType" type="String" access="public"/>
+    <aura:attribute name="leaseType" type="String"/>
+    <aura:attribute name="isChangePricing" type="Boolean" default="false" />
+    <aura:attribute name="isReadOnly" type="Boolean" default="false" />
+    <aura:attribute name="isEditPaymentDueDate" type="Boolean" default="false" />
+    <aura:attribute name="isEditPricing" type="Boolean" default="false" />
+    <aura:attribute name="isRenewWithPrice" type="Boolean" default="false" />
+    <aura:attribute name="isDisableIncludeCAM" type="Boolean" default="false" />
+    <aura:attribute name="periodIndex" type="String"/>
+    <aura:attribute name="oppObject" type="Object" default="{}"/>
+    <aura:attribute name="minTypeOption" type="List" default="[]"/>
+    <aura:attribute name="isRenewChangeDate" type="Boolean"/>
+    <aura:registerEvent name="PeriodChangeEvent" type="c:PeriodChangeEvent"/>
+
+
+    <div class="slds-grid slds-gutters">
+         <div class="slds-col slds-size_1-of-2">
+            <lightning:input class="slds-m-vertical_x-small" type="date" label="Pricing From" disabled="{!((v.oppObject.isAllowLongLeaseChangePeriod) ? false : (and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาปีปฏิทินแรก')))}" readonly="{!v.isReadOnly}" value="{!v.eachPeriod.PricingFrom}" dateStyle="short" onchange="{!c.onChangeDatePeriod}"/>
+         </div>
+         <div class="slds-col slds-size_1-of-2">
+            <lightning:input class="slds-m-vertical_x-small" type="date" label="Pricing To" disabled="{!((v.oppObject.isAllowLongLeaseChangePeriod) ? false : (and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาปีปฏิทินแรก')))}" readonly="{!v.isReadOnly}" value="{!v.eachPeriod.PricingTo}" dateStyle="short" onchange="{!c.onChangeDatePeriod}"/>
+         </div>
+    </div>
+
+    <div class="slds-grid slds-gutters slds-m-vertical_x-small">
+      
+    <div class="slds-col slds-size_1-of-2">
+        <div class="slds-clearfix">
+            <div class="slds-float_left">
+                <p class="slds-m-vertical_x-small">Calculation Method</p>
+                <!-- <p class="slds-m-vertical_x-small">Pricing From</p>
+                <p class="slds-m-vertical_x-small">Pricing To</p> -->
+            </div>
+            <div class="slds-float_right" style="word-break: break-all; width: 60%; ">
+                <p class="slds-m-vertical_x-small">{!v.eachPeriod.CalculationMethodLabel}</p>
+                <!-- <p class="slds-m-vertical_x-small"><ui:outputDate value="{!v.eachPeriod.PricingFrom}" format="DD/MM/YYYY"/></p>
+                <p class="slds-m-vertical_x-small"><ui:outputDate value="{!v.eachPeriod.PricingTo}" format="DD/MM/YYYY"/></p> -->
+            </div>
+        </div>
+    </div>
+      <div class="slds-col slds-size_1-of-2">
+        <div class="slds-clearfix">
+            	<aura:if isTrue = "{!v.rentServiceType == 'Advance'}">
+                    <div class="slds-float_left">
+                            <aura:if isTrue="{!!v.oppObject.isNoCAM}">
+                                <p class="slds-m-vertical_x-small">Is Include CAM</p>
+                            </aura:if>
+                            <!--<p class="slds-m-vertical_x-small">Option To Renew</p>-->
+                            <aura:if isTrue = "{!and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาปีปฏิทินแรก')}">
+                                <p class="slds-m-vertical_x-small">Escalation Remark</p>
+                            </aura:if>
+                    </div>
+                    <div class="slds-float_right">
+                        <aura:if isTrue="{!!v.oppObject.isNoCAM}">
+                            <lightning:input class="slds-m-vertical_x-small" type="checkbox"  name="" checked="{!v.eachPeriod.IsIncludeCAM}" disabled ="{!v.isReadOnly}" onchange="{!c.onChangePricing}"/>
+                        </aura:if>
+                        <!--<lightning:input class="slds-m-vertical_x-small" type="checkbox"  name="" checked="{!v.eachPeriod.OptionToRenew}" disabled ="{!v.isRenewWithPrice?false:((v.oppObject.isAllowChangeOptionToRenew)? false : (v.isReadOnly?v.isReadOnly:true))}" onchange="{!c.onChangeOptionToRenew}"/>-->
+                        <aura:if isTrue = "{!and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาปีปฏิทินแรก')}">
+                            <lightning:textarea class="slds-m-vertical_x-smal label-hidden" name=""  value="{!v.eachPeriod.escalationRemark}" onchange="{!c.onChangePricing}" disabled ="{!v.isReadOnly}"/>
+                        </aura:if>
+                    </div>
+                    <aura:set attribute="else">
+
+                        <aura:if isTrue = "{!and(v.leaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาปีปฏิทินแรก')}">
+                            <div class="slds-float_left">
+                                <aura:if isTrue="{!!v.oppObject.isNoCAM}">
+                                    <p class="slds-m-vertical_x-small">Is Include CAM</p>
+                                </aura:if>
+                                <!--<p class="slds-m-vertical_x-small">Option To Renew</p>-->
+                                <p class="slds-m-vertical_x-small">Escalation Remark</p>
+                            </div>
+                            <div class="slds-float_right">
+                                <aura:if isTrue="{!!v.oppObject.isNoCAM}">
+                                    <lightning:input class="slds-m-vertical_x-small" type="checkbox"  name="" checked="{!v.eachPeriod.IsIncludeCAM}" disabled ="{!v.isReadOnly}" onchange="{!c.onChangePricing}"/>
+                                </aura:if>
+                                <!--<lightning:input class="slds-m-vertical_x-small" type="checkbox"  name="" checked="{!v.eachPeriod.OptionToRenew}" disabled ="true" onchange="{!c.onChangeOptionToRenew}"/>-->
+                                <lightning:textarea class="slds-m-vertical_x-smal label-hidden" name="" value="{!v.eachPeriod.escalationRemark}" onchange="{!c.onChangePricing}" disabled ="{!v.isReadOnly}"/>
+                            </div>
+                            <aura:set attribute="else">
+                                <div class="slds-float_left">
+                                    <aura:if isTrue="{!!v.oppObject.isNoCAM}">
+                                        <p class="slds-m-vertical_x-small">Is Include CAM</p>
+                                    </aura:if>
+                                    <!--<p class="slds-m-vertical_x-small">Option To Renew</p>-->
+                                </div>
+                                <div class="slds-float_right">
+                                    <aura:if isTrue="{!!v.oppObject.isNoCAM}">
+                                        <lightning:input class="slds-m-vertical_x-small" type="checkbox"  name="" checked="{!v.eachPeriod.IsIncludeCAM}" disabled ="{!v.isReadOnly}" onchange="{!c.onChangePricing}"/>
+                                    </aura:if>
+                                    <!--<lightning:input class="slds-m-vertical_x-small" type="checkbox"  name="" checked="{!v.eachPeriod.OptionToRenew}" disabled ="{!v.isRenewWithPrice?false:((v.oppObject.isAllowChangeOptionToRenew)?false : (v.isReadOnly?v.isReadOnly:true))}" onchange="{!c.onChangeOptionToRenew}"/>-->
+                                </div>
+                            </aura:set>
+                        </aura:if>
+
+                    </aura:set>
+            	</aura:if>
+        </div>
+      </div>
+
+    </div>
+	
+	<p class="slds-text-heading_small">
+        Fixed Price
+        <aura:if isTrue="{!v.oppObject.isShowRentServicePriceWithVat}">
+            &emsp;
+            <!-- <lightning:formattedNumber style="currency" currencyCode="THB" currencyDisplayAs="symbol" value="{!(v.eachPeriod.FixedPriceSection.Price) + ((v.eachPeriod.FixedPriceSection.Price)*(v.oppObject.vatPercentValue/100))}" maximumFractionDigits="2" minimumFractionDigits="2"/> -->
+            {!$Label.c.RentServiceWithVat}  
+        </aura:if> 
+    </p>
+
+    <lightning:radioGroup
+                      label=""
+                      options="{! v.minTypeOption }"
+                      value="{!v.eachPeriod.FixedPriceSection.MinType}"
+                      type="radio"
+                      class="customRadioCls slds-m-vertical_x-small"
+                      disabled="{!v.isReadOnly}"
+                      onchange="{!c.onChangePricing}"/>
+
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+
+        <aura:if isTrue="{!v.eachPeriod.FixedPriceSection.MinType == 'Measurement'}">
+
+            <table>
+                <tr>
+                    <th>Leasable Area (Sq.m)</th>
+                    <th>Price (THB/Sq.m/Month)</th>
+                    <th>Summary (THB/Month)</th>
+                </tr>
+                <tr>
+                    <td><lightning:formattedNumber value="{!v.eachPeriod.FixedPriceSection.TotalArea}" maximumFractionDigits="2"/></td>
+                    <td>
+                        <lightning:input class="priceInput label-hidden" step=".01" type="number" name="" label="" value="{!v.eachPeriod.FixedPriceSection.PriceSQM}" onchange="{!c.onChangeFixPricingSQM}" onblur="{!c.onBlurFixPricingSQM}" disabled ="{!(v.isEditPricing)?true:v.isReadOnly}"  min="1"/>
+                    </td>
+                    <td>
+                        <lightning:input class="priceInput label-hidden" step=".01" type="number" name="" label="" value="{!v.eachPeriod.FixedPriceSection.Price}" readonly="true"/>
+                    </td>
+                </tr>
+            </table>
+
+            <aura:set attribute="else">
+        		 <div class="slds-col slds-size_1-of-2">
+        			<p class="slds-m-vertical_x-small">Price (THB/Month)</p>
+        		 </div>
+        		 <div class="slds-col slds-size_1-of-2">
+        		 	<lightning:input class="slds-size_2-of-3 priceInput label-hidden" step=".01" type="number" label="" value="{!v.eachPeriod.FixedPriceSection.Price}"  onblur="{!c.onBlurFixPricing}" disabled ="{!(v.isEditPricing)?true:v.isReadOnly}"  min="1"/>
+        		 </div>
+            </aura:set>
+        </aura:if>
+	</div>
+
+	<p class="slds-text-heading_small">Proportion</p>
+
+    <div class="slds-grid slds-gutters slds-m-vertical_x-small">
+      
+    	<table>
+    		<tr>
+    			<th>Proportion</th>
+    			<th>Rent</th>
+    			<th>Service</th>
+    			<!-- <th>Air Service</th> -->
+    		</tr>
+    		<!-- <aura:iteration items="{!v.eachPeriod.ProportionList}" var="eachProportion" indexVar="proportionIndex"> -->
+        		<tr>
+        			<td>{!v.eachPeriod.Proportion.Proportion}</td>
+        			<td><lightning:input class="centerInput label-hidden" step=".01" type="number" name="camEscaltionRate" label="" value="{!v.eachPeriod.Proportion.Rent}" onchange="{!c.onChangePricing}" onblur="{!c.onBlurProportion}" disabled ="{!v.isReadOnly}" /></td>
+        			<td><lightning:input class="centerInput label-hidden" step=".01" type="number" name="camEscaltionRate" label="" value="{!v.eachPeriod.Proportion.Service}" onchange="{!c.onChangePricing}" onblur="{!c.onBlurProportion}" disabled ="{!v.isReadOnly}" /></td>
+        			<!-- <td><lightning:input class="slds-size_2-of-3" type="number" name="camEscaltionRate" label="" value="{!eachProportion.AirService}"/></td> -->
+        		</tr>
+    		<!-- </aura:iteration> -->
+    	</table>
+    </div>
+</aura:component>

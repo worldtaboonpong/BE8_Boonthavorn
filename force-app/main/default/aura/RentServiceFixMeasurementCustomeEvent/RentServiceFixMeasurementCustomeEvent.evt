@@ -1,0 +1,4 @@
+<aura:event type="APPLICATION" description="This Event should trigger when Oppportunity Calculation type is fix measurment">
+
+<aura:attribute name="rentServicePricingMessage" type="Object"/>
+</aura:event>

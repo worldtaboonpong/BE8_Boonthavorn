@@ -1,0 +1,113 @@
+<apex:page standardController="Contract__c" extensions="OppPDFSubPageController" showHeader="false" sidebar="false" standardStylesheets="false"
+    applyBodyTag="false" applyHtmlTag="false">
+
+    <div class="text-container">
+        <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize == 0}">
+            <p class="contractWording">
+                <span style="font-size:16px;">
+                    ไม่มีห้องผูกไว้กับสัญญา
+                </span>
+            </p>
+        </apex:outputText>
+        <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize > 0}">
+            <apex:outputText rendered="{!Contract__c.Rental_Type__c == 'Space_Rental'}">
+                <apex:variable value="{!1}" var="list" />
+                <p class="contractUnitWording">
+                    <span style="font-size:16px;"> ผู้ให้เช่าตกลงให้เช่า และผู้เช่าตกลงเช่าห้อง จำนวน {!ContractFeePeriod_Space.unitListSize} ห้อง ได้แก่
+                        <!-- apex output check if more than 2 units -->
+                        <!-- <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize == 1}">
+                            เลขที่ {!Contract__c.Unit_No__c} ของอาคารศูนย์การค้าฯพื้นที่ {!ContractFeePeriod_Space.measurementType[unit]} รวมมีจำนวน
+                            พื้นที่ทั้งสิ้นประมาณ
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!Contract__c.Agreement_Total_Area__c}" />
+                            </apex:outputText> ตารางเมตร
+                        </apex:outputText> -->
+                        <!-- <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize > 1}">
+                            จำนวน {!ContractFeePeriod_Space.unitListSize} ห้อง ได้แก่
+                        </apex:outputText> -->
+                        <apex:repeat value="{!ContractFeePeriod_Space.rentalUnit}" var="unit">
+                            <p class="contractSubWording">
+                                - ห้องเลขที่ {!unit} ของอาคารศูนย์การค้าฯ จำนวนพื้นที่ทั้งสิ้นประมาณ
+                                <apex:outputText value="{0,number, ###,###,##0.00}">
+                                    <apex:param value="{!ContractFeePeriod_Space.measurementArea[unit]}" />
+                                </apex:outputText> ตารางเมตร
+                                <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize > list}">
+                                    <br/> และ
+                                    <apex:variable value="{!list+1}" var="list" />
+                                </apex:outputText>
+                            </p>
+                        </apex:repeat>
+                        <p class="contractSubWording">
+                            รวมมีจำนวนพื้นที่ทั้งสิ้นประมาณ
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!Contract__c.Agreement_Total_Area__c}" />
+                            </apex:outputText>
+                            ตารางเมตร
+                        </p>
+                        <p class="contractWording" style="text-align:justify;">
+                            รวมถึงส่วน ควบเครื่องอุปกรณ์ ที่ติดอยู่ ขณะทำสัญญานี้หรือที่มีขึ้น ภายหลังและรวมทั้ง ทรัพย์สิน ตามบันทึก ท้ายสัญญานี้ (ซึ่งต่อไปในสัญญานี้จะเรียกว่า
+                            “สถานที่เช่า”) โดยรายละเอียดของสถานที่ เช่าเป็นไปตาม แผนผัง แนบท้ายสัญญานี้ และถือเป็น ส่วนหนึ่งของ
+                            สัญญานี้ด้วยทั้งนี้ จำนวนพื้นที่ของ สถานที่เช่าตาม วรรคก่อน  เป็นพื้นที่โดยประมาณ เมื่อการก่อสร้าง
+                            อาคารศูนย์การค้าฯ แล้วเสร็จ หากจำนวนพื้นที่ของ สถานที่เช่าเพิ่มขึ้น หรือลดลง ก็ตามคู่สัญญา ตกลงกันให้เพิ่ม
+                            หรือ ลดค่าเช่า ของสัญญาเช่าพื้นที่ ข้อ.4 ตามอัตราส่วน ของจำนวนพื้นที่ เพิ่มขึ้น หรือลดลง
+                        </p>
+                    </span>
+                </p>
+            </apex:outputText>
+            <apex:outputText rendered="{!Contract__c.Rental_Type__c == 'OP_Rental'}">
+                <apex:variable value="{!1}" var="list" />
+                <p class="contractUnitWording">
+                    <span style="font-size:16px;text-indent:3em;"> ผู้ให้บริการตกลงให้บริการพื้นที่ และผู้รับบริการตกลงรับบริการพื้นที จำนวน {!ContractFeePeriod_Space.unitListSize}
+                        ห้อง ได้แก่
+                        <!-- apex output check if more than 2 units -->
+                        <!-- <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize == 1}">
+                            เลขที่ {!Contract__c.Unit_No__c} ของอาคารศูนย์การค้าฯ พื้นที่ {!ContractFeePeriod_Space.measurementType[unit]} รวมมีจำนวนพื้นที่ทั้งสิ้นประมาณ
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!Contract__c.Agreement_Total_Area__c}" />
+                            </apex:outputText> ตารางเมตร
+                        </apex:outputText> -->
+                        <!-- <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize > 1}">
+                            จำนวน {!ContractFeePeriod_Space.unitListSize} ห้อง ได้แก่
+                        </apex:outputText> -->
+
+                        <apex:repeat value="{!ContractFeePeriod_Space.rentalUnit}" var="unit">
+                            <p class="contractSubWording">
+                                - ห้องเลขที่ {!unit} ของอาคารศูนย์การค้าฯ จำนวนพื้นที่ทั้งสิ้นประมาณ
+                                <apex:outputText value="{0,number, ###,###,##0.00}">
+                                    <apex:param value="{!ContractFeePeriod_Space.measurementArea[unit]}" />
+                                </apex:outputText> ตารางเมตร
+                                <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize > list}">
+                                    และ
+                                    <apex:variable value="{!list+1}" var="list" />
+                                </apex:outputText>
+                            </p>
+                        </apex:repeat>
+                        <p class="contractSubWording">
+                            รวมมีจำนวนพื้นที่ทั้งสิ้นประมาณ
+                            <apex:outputText value="{0,number, ###,###,##0.00}">
+                                <apex:param value="{!ContractFeePeriod_Space.totalLeasableArea}" />
+                            </apex:outputText>
+                            ตารางเมตร
+                        </p>
+                        <p class="contractWording" style="text-align:justify;">
+                            รวมถึงส่วน ควบเครื่องอุปกรณ์ ที่ติดอยู่ ขณะทำสัญญานี้หรือที่มีขึ้น ภายหลังและรวมทั้ง ทรัพย์สินตามบันทึก แนบท้ายสัญญานี้ (ซึ่งต่อไปในสัญญานี้จะเรียกว่า
+                            “สถานที่ให้บริการ”) โดยรายละเอียด ของสถานที่ให้บริการ เป็นไปตาม แผนผัง แนบท้ายสัญญานี้ และถือเป็นส่วนหนึ่ง
+                            ของสัญญา ให้บริการพื้นที่นี้ด้วย ทั้งนี้ จำนวนพื้นที่ของ สถานที่ให้บริการ ตามวรรคก่อน เป็นพื้นที่โดยประมาณ
+                            เมื่อการก่อสร้างอาคาร ศูนย์การค้าฯ แล้วเสร็จ หากจำนวนพื้นที่ของ สถานที่ให้บริการเพิ่มขึ้น หรือลดลง
+                            ก็ตามคู่สัญญา ตกลงกัน ให้เพิ่ม หรือลดค่าบริการ ของสัญญาให้บริการพื้นที่ ข้อ.5 ตามอัตราส่วน ของจำนวนพื้นที่
+                            เพิ่มขึ้น หรือลดลง
+                        </p>
+                    </span>
+                </p>
+            </apex:outputText>
+        </apex:outputText>
+    </div>
+</apex:page>
+
+<!-- ผู้ให้เช่าตกลงให้เช่า และผู้เช่าตกลงเช่าห้องเลขที่ {FIELD:Unit_No__c} ของอาคารศูนย์การค้าฯ พื้นที่ {FIELD:Measurement_Type_for_Document__c} รวมมีจำนวนพื้นที่ทั้งสิ้น ประมาณ {FIELD:Agreement_Total_Area__c} ตารางเมตร รวมถึงส่วนควบเครื่องอุปกรณ์ที่ติดอยู่ ขณะทำสัญญานี้ หรือที่มีขึ้นภายหลัง และรวมทั้งทรัพย์สิน ตามบันทึกท้ายสัญญานี้ (ซึ่งต่อไปในสัญญานี้ จะเรียกว่า “สถานที่เช่า”) โดยรายละเอียดของสถานที่เช่า เป็นไปตามแผนผังแนบท้ายสัญญานี้ และถือเป็น ส่วนหนึ่งของสัญญานี้ด้วย ทั้งนี้ จำนวนพื้นที่ของสถานที่เช่าตามวรรคก่อน เป็นพื้นที่โดยประมาณ เมื่อการ ก่อสร้างอาคารศูนย์การค้าฯ แล้วเสร็จ หากจำนวนพื้นที่ของสถานที่เช่าเพิ่มขึ้น หรือลดลงก็ตาม คู่สัญญา ตกลงกันให้เพิ่ม หรือลดค่าเช่าของสัญญาเช่าพื้นที่ ข้อ.4 ตามอัตราส่วนของจำนวนพื้นที่เพิ่มขึ้น หรือลดลง -->
+
+<!-- ผู้ให้บริการตกลงให้บริการพื้นที่ และผู้รับบริการตกลงรับบริการพื้นที่ ห้องเลขที่ OP102 ตั้งอยู่บนชั้น
+Fl.1 ของอาคารศูนย์การค้าฯ รวมมีจำนวนพื้นที่ทั้งสิ้น ประมาณ 70.00 ตารางเมตร รวมถึงส่วนควบเครื่อง
+อุปกรณ์ ที่ติดอยู่ขณะทำสัญญานี้ หรือที่มีขึ้นภายหลัง และรวมทั้งทรัพย์สิน ตามบันทึกแนบท้าย สัญญานี้
+ซึ่งต่อไปในสัญญานี้จะเรียกว่า “สถานที่ให้บริการ” โดยรายละเอียด ของสถานที่ให้บริการ เป็นไปตาม
+แผนผังแนบท้ายสัญญานี้ และถือเป็นส่วนหนึ่ง ของสัญญาให้บริการพื้นที่นี้ด้วย -->

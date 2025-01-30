@@ -1,0 +1,86 @@
+<aura:component access="global" controller="QuotationPrepController">
+	
+	<aura:handler name="init" value="{! this }" action="{! c.init }"/>
+	<aura:handler event="c:RentServiceFixMeasurementCustomeEvent" action="{!c.onRenservicePriceChange}"/>
+	<aura:registerEvent name="oppDetailEvent" type="c:OppDetailEvent"/>
+	
+	<aura:attribute name="seletedRoom" type="List" default="[]"/>
+	<aura:attribute name="camPricing" type="Object" default="{}"  access="public"/>
+	<aura:attribute name="camType" type="String" />
+	<aura:attribute name="oppObject" type="Object" default="{}"/>
+
+	<aura:attribute name="oppDetail_OppBuilding" type="String" default=""/>
+    <aura:attribute name="oppDetail_ContractStartDate" type="String" default=""/>
+    <aura:attribute name="oppDetail_ContractEndDate" type="String" default=""/>
+    <aura:attribute name="oppDetail_TotalMeasurmentArea" type="Decimal" default="0"/>
+    <aura:attribute name="oppDetail_TotalLeasableArea" type="Decimal" default="0"/>
+    <aura:attribute name="oppDetail_LeaseType" type="String"/>
+    <aura:attribute name="oppDetail_CAMOrAirService" type="String"/>
+    <aura:attribute name="oppDetail_calculationAndReporting" type="String"/>
+    <aura:attribute name="isInitialPageWithCAM" type="Boolean" default="false"/>
+    <aura:attribute name="isInitialPageWithRentService" type="Boolean" default="false"/>
+	<aura:attribute name="isInitialPageWithPeriod" type="Boolean" default="false"/>
+
+	<aura:attribute name="rentServicePricing" type="Object" default="{}"/>
+	<aura:attribute name="rentServiceType" type="String" />
+	<aura:attribute name="periodPricing" type="List" default="[]"/>
+	<aura:attribute name="addedPeriodType" type="String" />
+	<aura:attribute name="pricingType" type="String" default="CAM"/>
+
+	<aura:attribute name="isSelectedCAMType" type="Boolean" default="true"/>
+	<aura:attribute name="isSelectedAirServiceType" type="Boolean"/>
+
+	<aura:attribute name="calculationReporting" type="List"/>
+	<aura:attribute name="calculationMethodOption" type="List" default="[]"/>
+	<aura:attribute name="reportingRuleOption" type="List" default="[]"/>
+	<aura:attribute name="reportingRuleMap" type="Map" default="{}"/>
+	<aura:attribute name="minTypeOption" type="List" default="[]"/>
+
+	<aura:attribute name="isChangePricing" type="Boolean" default="false" />
+	<aura:attribute name="isChangeGrading" type="Boolean" default="false" />
+	<aura:attribute name="isReadOnly" type="Boolean" default="false" />
+	<aura:attribute name="isEditPaymentDueDate" type="Boolean" default="false" />
+	<aura:attribute name="isEditPricing" type="Boolean" default="false" />
+	<aura:attribute name="isEditPricingFromRequest" type="Boolean" default="false" />
+	<aura:attribute name="isRenewChangeDate" type="Boolean" />
+	<aura:attribute name="isRenewCAMChangeDate" type="Boolean" />
+
+	<aura:attribute name="isSelectCAMEscalation" type="Boolean" />
+	<aura:attribute name="isSelectCAMAdvance" type="Boolean" />
+	<aura:attribute name="isSelectRentServiceEscalation" type="Boolean"/>
+	<aura:attribute name="isSelectRenServiceAdvance" type="Boolean" />
+	<aura:attribute name="yearlyTierOption" type="List" default="[]"/>
+	<aura:attribute name="originalEsclateCAMPricing" type="Object" default="{}"/>
+
+	<div class=" slds-m-vertical_x-small">
+        <c:OppInfoComponent OppBuilding="{!v.oppDetail_OppBuilding}" TotalLeasableArea="{!v.oppDetail_TotalLeasableArea}" TotalMeasurmentArea="{!v.oppDetail_TotalMeasurmentArea}" ContractEndDate="{!v.oppDetail_ContractEndDate}" ContractStartDate="{!v.oppDetail_ContractStartDate}" RenewStartDate="{!v.oppObject.renewStartDate}" RenewEndDate="{!v.oppObject.renewEndDate}"/>
+	</div>
+    
+	<div class="componentWidth">
+		<aura:if isTrue="{!not(v.oppObject.isNoCAM)}">
+			<c:CAMPricingComponent
+				seletedRoom="{!v.seletedRoom}" 
+				camPricing="{!v.camPricing}"
+				isInitialPageWithCAM="{!v.isInitialPageWithCAM}"  
+				camType="{!v.camType}" 
+				leaseType="{!v.oppDetail_LeaseType}"
+				isSelectedCAMType="{!v.isSelectedCAMType}" 
+				isSelectedAirServiceType = "{!v.isSelectedAirServiceType}"
+				isChangePricing = "{!v.isChangePricing}"
+				isReadOnly="{!v.isReadOnly}"
+				oppObject="{!v.oppObject}"
+				isEditPaymentDueDate="{!v.isEditPaymentDueDate}"
+				isEditPricing="{!v.isEditPricing}"
+				isSelectCAMEscalation = "{!v.isSelectCAMEscalation}"
+				isSelectCAMAdvance = "{!v.isSelectCAMAdvance}"
+				isEditPricingFromRequest = "{!v.isEditPricingFromRequest}"
+				originalEsclateCAMPricing="{!v.originalEsclateCAMPricing}"
+				isRenewChangeDate="{!v.isRenewCAMChangeDate}"/>
+		</aura:if>
+			
+		<aura:if isTrue="{!(v.oppDetail_LeaseType == 'Short-Term' || (and(v.oppDetail_LeaseType == 'Long-Term',v.oppObject.longleaseType == 'ระบุราคาทุกปีตามปีสัญญา')) )&amp;&amp; (v.oppObject.calculationMethod == 'GP with Min' || v.oppObject.calculationMethod == 'GP on Top')}">
+			<c:RentServicePricingComponent rentServicePricing="{!v.rentServicePricing}" rentServiceType="{!v.rentServiceType}" isChangePricing = "{!v.isChangePricing}" isReadOnly="{!v.isReadOnly}" isInitialPageWithRentService="{!v.isInitialPageWithRentService}" isInitialPageWithPeriod="{!v.isInitialPageWithPeriod}" isEditPricing="{!v.isEditPricing}" oppObject = "{!v.oppObject}" isSelectRentServiceEscalation="{!v.isSelectRentServiceEscalation}" isSelectRenServiceAdvance="{!v.isSelectRenServiceAdvance}"/>
+		</aura:if>
+		<c:PeriodPricingComponent periodPricing="{!v.periodPricing}" rentServiceType="{!v.rentServiceType}" calculationMethodOption="{!v.calculationMethodOption}" reportingRuleOption="{!v.reportingRuleOption}" minTypeOption="{!v.minTypeOption}" reportingRuleMap="{!v.reportingRuleMap}" seletedRoom = "{!v.seletedRoom}" leaseType="{!v.oppDetail_LeaseType}" isChangePricing = "{!v.isChangePricing}" isReadOnly="{!v.isReadOnly}" isEditPaymentDueDate="{!v.isEditPaymentDueDate}" isEditPricing="{!v.isEditPricing}" oppObject="{!v.oppObject}" isChangeGrading="{!v.isChangeGrading}" yearlyTierOption = "{!v.yearlyTierOption}" isRenewChangeDate="{!v.isRenewChangeDate}"/>
+	</div>
+</aura:component>

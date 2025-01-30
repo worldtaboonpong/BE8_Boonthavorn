@@ -1,0 +1,327 @@
+<apex:page controller="ManualBatch_Controller" standardStylesheets="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0" showHeader="false" >
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en">
+    <apex:includeScript value="https://code.jquery.com/jquery-1.8.2.js"/> 
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Manual Batch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <apex:slds />
+  <!-- <script src="https://mobile1.t.salesforce.com/soap/ajax/36.0/connection.js" type="text/javascript" /> -->
+  <script src="/soap/ajax/37.0/connection.js" type="text/javascript"/>
+</head>
+<body style="background-color: white;">
+<apex:form id="mainForm">
+    <apex:inputHidden id="inputHidden" value="{!oneTimeValue}"/>
+    <apex:inputHidden id="batchSizeHidden" value="{!batchSize}"/>
+        
+  <div class="slds-scope"> 
+    <div class="targetApp" id="divIdtargetApp">
+        <div class="slds-page-header">
+            <div class="slds-media">
+              <div class="slds-media__figure">
+                <span class="slds-icon_container slds-icon-standard-trailhead" title="">
+                  <svg class="slds-icon" aria-hidden="true">
+                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/standard-sprite/svg/symbols.svg#service_appointment')}"></use>
+                  </svg>
+                </span>
+              </div>
+              <div class="slds-media__body">
+                <h1 class="slds-page-header__title slds-truncate slds-align-middle" title="">Manual Batch</h1>
+                <p class="slds-text-body_small slds-line-height_reset"> One-time and Schedule Batch </p>
+              </div>
+            </div>
+        </div>
+
+        <apex:pageBlock >
+         <!-- ERROR ALERT DIV -->
+        <apex:outputPanel layout="block" id="msg_block" style="display: none;">
+            <div id="err_wrapper"
+                 class="slds-notify slds-notify--alert slds-theme--{!alertType} slds-theme--alert-texture"
+                 role="alert">
+                <h2>
+                    <div xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <svg aria-hidden="true"
+                             class="slds-icon icon-text-email slds-icon--small slds-m-right--x-small">
+                            <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#' + if(alertType = 'success','check','ban'))}"></use>
+                        </svg>
+                        <span id="err_text"></span>
+                    </div>
+                </h2>
+            </div>
+        </apex:outputPanel>
+
+        <!--APEX VARIABLES DIV-->
+        <apex:outputPanel id="post_errorprocessing">
+            <script>
+                var hasMessages = {!hasMessages};
+                var errorMessage = "{!errorMessage}";
+                if (hasMessages) {
+                        $('#err_text').html(errorMessage);
+                        $('[id$=msg_block]').show();
+                    } else {
+                        $('[id$=msg_block]').hide();
+                    }
+            </script>
+        </apex:outputPanel>
+
+        <!-- <apex:pageMessages id="errorMsg" /> -->
+        <div class="slds-panel__section" id="content">  
+            <legend class="slds-form-element__label slds-text-title--caps">BATCH SELECTION</legend>  
+            <div class="form-element__group">  
+                <div class="slds-form" role="list">
+                    <div class="slds-form-form__row">
+                        <div class="slds-form__item" role="listitem">
+                            <div class="slds-form-element slds-form-element_horizontal slds-is-editing">
+                                <apex:selectRadio id="runType" value="{!runType}" onchange="showRunType(this.value);" >
+                                    <apex:selectOptions value="{!TypeValue}" />
+                                </apex:selectRadio>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form__row">
+                        <div class="slds-form__item" role="listitem">
+                          <div class="slds-form-element slds-form-element_horizontal slds-is-editing">
+                            <label class="slds-form-element__label" for="single-form-element-id-02">Batch Name:</label>
+                            <div class="slds-form-element__control">
+                                <apex:selectList value="{!batchName}" styleClass="slds-select" multiselect="false" size="1" label="Batch Name" onchange="onchangeBatchName();">
+                                    <apex:selectOptions value="{!FieldValue}" />
+                                </apex:selectList>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="slds-form__item" role="listitem">
+                          <div class="slds-form-element slds-form-element_horizontal slds-is-editing">
+                            <label class="slds-form-element__label" for="single-form-element-id-03">Size:</label>
+                            <input type="number" min="1" max="2000" value="{!batchSize}" id="inputSize" name="inputSize" />
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <apex:outputPanel id="manualBlock" styleClass="manualBlock" >
+                <legend class="slds-form-element__label slds-text-title--caps">BATCH SECTION</legend> 
+                <div class="slds-box" style="border-color: #3F5109; border-width: 3px;">
+                    <label class="slds-form-element__label" for="single-form-element-id-02">Please Select Batch Name and input batch size</label>
+                    <apex:commandButton id="runButton" styleClass="slds-button slds-button--brand slds-not-selected" onclick="getSize();" action="{!runBatch}" value="Run" reRender="pbTable,sjTable,msg_block,post_errorprocessing"/>
+                </div>
+            </apex:outputPanel>
+         
+            <apex:outputPanel id="pbRunSchedule" styleClass="scheduleBlock">
+                <legend class="slds-form-element__label slds-text-title--caps">SCHEDULE SECTION</legend> 
+                <apex:outputPanel >
+                    <div class="slds-box" style="border-color: #3F5109; border-width: 3px;">
+                        Frequency:&nbsp;
+                         <div class="slds-form-element__control">
+                            <apex:selectRadio id="freqType" value="{!scheduleType}" onchange="showBlock(this.value);" >
+                                <apex:selectOptions value="{!scheduleTypeValue}" />
+                            </apex:selectRadio>
+                        </div>
+                        
+                        <br/>
+                        <apex:outputPanel id="freqOutput">
+                            <apex:outputPanel styleClass="oneTimeBlock">
+                                <div class="slds-box">
+                                    Select date to run:&nbsp;
+                                    <input type="date" id="inputDate" name="inputDate" />
+                                </div>
+                            </apex:outputPanel>
+                            <apex:outputPanel styleClass="dailyBlock">
+                                <div class="slds-box">
+                                    <apex:selectRadio value="{!dailyType}" layout="pageDirection">
+                                        <apex:selectOptions value="{!DailyTypeValue}" />
+                                    </apex:selectRadio>
+                                </div>
+                            </apex:outputPanel>
+                            <apex:outputPanel styleClass="weeklyBlock">
+                                <div class="slds-box">
+                                    <apex:selectCheckboxes value="{!weeklyType}" layout="pageDirection">
+                                        Recurs every week on
+                                        <apex:selectOptions value="{!WeeklyValue}" />
+                                    </apex:selectCheckboxes>
+                                </div>
+                            </apex:outputPanel>
+                            <apex:outputPanel styleClass="monthlyBlock" >
+                                <div class="slds-box">
+                                    On day: &nbsp;
+                                    <apex:selectList value="{!monthlyType}" multiselect="false" size="1" label="day">
+                                        <apex:selectOptions value="{!dayList}" />
+                                    </apex:selectList>
+                                    &nbsp; of every month.
+                                </div>
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+                        <br/>
+                        <div class="form-element__group">  
+                            <div class="slds-form" role="list">
+                                <div class="slds-form__row">
+                                    <div class="slds-form__item" role="listitem">
+                                      <div class="slds-form-element slds-form-element_horizontal slds-is-editing">
+                                        <label class="slds-form-element__label" for="single-form-element-id-02">Time:</label>
+                                            <div class="slds-form-element slds-form-element_horizontal slds-is-editing">
+                                                <apex:selectList required="true" value="{!hoursInput}" multiselect="false" size="1" label="Hours">
+                                                    <apex:selectOptions value="{!hourList}" />
+                                                </apex:selectList> &nbsp;:&nbsp;
+                                                <apex:selectList value="{!minInput}" multiselect="false" size="1" label="Minutes">
+                                                    <apex:selectOptions value="{!minuteList}" />
+                                                </apex:selectList>
+                                                &nbsp;
+                                                <apex:commandButton id="btnRunSchedule" onclick="getInputDate();getSize();" action="{!runSchedule}" value="Schedule Run" reRender="sjTable,msg_block,post_errorprocessing" styleClass=" slds-button slds-button--brand slds-not-selected"/>
+                                            </div>
+                                      </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                      
+                    </div>
+                </apex:outputPanel>
+            </apex:outputPanel>  
+        </div>
+            <apex:actionRegion >
+                <apex:actionPoller action="{!refreshBatchJob}" reRender="pbTable" interval="5"/>
+                <div class="slds-panel__section"> 
+                    <legend class="slds-form-element__label slds-text-title--caps">BATCH STATUS</legend>
+                    <div class="slds-box" style="border-color: #3F5109; border-width: 3px;">
+                         <apex:pageBlock id="pbStatus">
+                            <apex:pageBlockTable value="{!batchJobs}" var="b" id="pbTable" styleClass="slds-table slds-table--bordered slds-table--striped">
+                                <apex:column headerValue="Apex Class" value="{!b.batchName}"/>
+                                <apex:column headerValue="Status" value="{!b.jobStatus}"/>
+                                <apex:column headerValue="Total Job Items" value="{!b.jobTotal}"/>
+                                <apex:column headerValue="Job Items Processed" value="{!b.jobItemsProcessed}"/>
+                                <apex:column headerValue="Number Of Errors" value="{!b.jobErrors}"/>
+                                <apex:column headerValue="Created Date" value="{!b.createdDate}"/>
+                                <apex:column headerValue="Completed Date" value="{!b.completedDate}"/>
+                            </apex:pageBlockTable>
+                        </apex:pageBlock>
+                    </div>
+                    <apex:outputLink value="/apexpages/setup/listAsyncApexJobs.apexp" target="_blank">Link to Apex Job</apex:outputLink>
+                </div> 
+                <div class="slds-panel__section">  
+                    <legend class="slds-form-element__label slds-text-title--caps">SCHEDULE JOB STATUS</legend>  
+                    <div class="slds-box" style="border-color: #3F5109; border-width: 3px;">
+                        <apex:pageBlock id="SchedulStatus">
+                        <apex:pageBlockTable value="{!scheduleJobs}" var="sj" id="sjTable" styleClass="slds-table slds-table--bordered slds-table--striped">
+                            <apex:column headerValue="Job" value="{!sj.jobName}"/>
+                            <apex:column headerValue="Status" value="{!sj.jobStatus}"/>
+                            <apex:column headerValue="Created Date" value="{!sj.createdTime}"/>
+                            <apex:column headerValue="Next Fire Time" value="{!sj.nextFireTime}"/>
+                            <apex:column headerValue="Previous Fire Time" value="{!sj.previousFireTime}"/>
+                            <apex:column headerValue="End Time" value="{!sj.endTime}"/>
+                            <apex:column >
+                                <apex:commandButton action="{!deleteSchedule}" value="Delete" onclick="this.disabled = true;" reRender="SchedulStatus" styleClass="slds-button slds-button--brand slds-not-selected" >
+                                    <apex:param name="deleteSchedule" value="{!sj.jobId}" assignTo="{!deleteJobId}"/>
+                                </apex:commandButton>
+                            </apex:column>
+                        </apex:pageBlockTable>
+                        </apex:pageBlock>
+                    </div>
+                </div>
+            </apex:actionRegion>
+        </apex:pageBlock>
+
+    </div>
+  </div>
+</apex:form>
+
+</body>
+</html>
+    
+    <script>
+        $(document).ready(function(){
+           overridePageMessages();    
+        });
+         
+    function overridePageMessages(){    
+        var textureEffect = '';
+        //Uncomment below line for texture effect on page messages
+        //textureEffect = 'slds-theme--alert-texture';
+                      
+        $('.warningM3').addClass('slds-notify slds-notify--toast slds-theme--warning customMessage '+textureEffect);          
+        $('.confirmM3').addClass('slds-notify slds-notify--alert slds-theme--success  customMessage '+textureEffect);    
+        $('.errorM3').addClass('slds-notify slds-notify--alert slds-theme--error customMessage '+textureEffect);                  
+        $('.infoM3').addClass('slds-notify slds-notify--toast customMessage '+textureEffect);    
+                          
+        $('.errorM3').removeClass('errorM3'); 
+        $('.confirmM3').removeClass('confirmM3'); 
+        $('.infoM3').removeClass('infoM3');   
+        $('.warningM3').removeClass('warningM3');  
+    }
+
+        function showRunType(type) {
+            var blockManual = document.querySelector(".manualBlock");
+            var blockSchedule = document.querySelector(".scheduleBlock");
+            if (type == 'Manual') {
+                blockManual.style.display = 'inline';
+                blockSchedule.style.display = 'none';
+            } else if (type == 'Schedule') {
+                blockSchedule.style.display = 'block';
+                blockManual.style.display = 'none';
+            } 
+        }
+
+        function showBlock(freqType) {
+            var blockOneTime = document.querySelector(".oneTimeBlock");
+            var blockDaily = document.querySelector(".dailyBlock");
+            var blockWeekly = document.querySelector(".weeklyBlock");
+            var blockMonthly = document.querySelector(".monthlyBlock");
+            if (freqType == 'Daily') {
+                blockDaily.style.display = 'block';
+                blockWeekly.style.display = 'none';
+                blockMonthly.style.display = 'none';
+                blockOneTime.style.display = 'none';
+            } else if (freqType == 'Monthly') {
+                blockMonthly.style.display = 'block';
+                blockWeekly.style.display = 'none';
+                blockDaily.style.display = 'none';
+                blockOneTime.style.display = 'none';
+            } else if (freqType == 'Weekly') {
+                blockWeekly.style.display = 'block';
+                blockDaily.style.display = 'none';
+                blockMonthly.style.display = 'none';
+                blockOneTime.style.display = 'none';
+            } else if (freqType == 'One Time') {
+                blockOneTime.style.display = 'block';
+                blockWeekly.style.display = 'none';
+                blockDaily.style.display = 'none';
+                blockMonthly.style.display = 'none';
+            }
+            
+        }
+         function getInputDate(){
+            document.getElementById('{!$Component.mainForm.inputHidden}').value = document.getElementById("inputDate").value;
+        };
+        function getSize(){
+            document.getElementById('{!$Component.mainForm.batchSizeHidden}').value = document.getElementById("inputSize").value;
+            debugger;
+            $('.slds-button[value="Run"]').prop('disabled', true);
+        }
+        function onchangeBatchName(){
+            $('.slds-button[value="Run"]').prop('disabled', false);
+        }
+        (function() {
+            showBlock('Daily');
+            showRunType('Manual');
+        })();
+    </script>
+
+    <style>
+        .msgIcon {
+            display: none!important
+        }
+        .customMessage * {
+            color: #fff!important
+        }
+        .customMessage {
+            margin: 5px 0!important;
+            max-width: 1280px;
+            opacity: 1!important;
+            width: 100%;
+            font-size: 12px;
+            border: 0px;
+            padding-left: 10px;
+        }
+        .message {
+            opacity: .1
+        }
+    </style>
+</apex:page>

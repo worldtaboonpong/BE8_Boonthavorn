@@ -1,0 +1,68 @@
+<aura:component>
+
+	<aura:attribute name="installmentList" type="List" default="[]"/>
+	<aura:attribute name="totalInstallment" type="Decimal" default="0" />
+    <aura:attribute name="NumberOfInstallment" type="Decimal" default="0" />
+    <aura:attribute name="TotalPrice" type="Decimal" default="0" />
+    <aura:attribute name="isChangeExpense" type="Boolean" default="false" />
+    <aura:attribute name="isChangeDeposit" type="Boolean" default="false" />
+    <aura:attribute name="disableForLeasehold" type="Boolean" default="false" />
+    <aura:attribute name="isLEASEHOLDSUMMARY" type="Boolean" default="false" />
+    <aura:attribute name="isReadOnly" type="Boolean" default="false" />
+    <aura:attribute name="isLeaseHold" type="Boolean" />
+    <aura:attribute name="isConfirmRemove" type="Boolean" default="false"/>
+    <aura:attribute name="oppObject" type="Object" default="{}"/>
+    <aura:attribute name="typeGroup" type="String" default="" />
+    <aura:attribute name="type" type="String" default="" />
+    <aura:attribute name="expenseTypeValue" type="String" default="" />
+
+    <aura:attribute name="isEditPaymentDueDate" type="Boolean" default="false" />
+
+    <aura:registerEvent name="leaseHoldInstallmentEvent" type="c:InstallmentBoxEvent"/>
+    <aura:registerEvent name="leaseHoldInstallmentAmountEvent" type="c:InstallmentBoxEvent"/>
+    <lightning:overlayLibrary aura:id="confirmOverlay"/>
+
+	<table class="slds-m-vertical_small installmentTable">
+    		<tr class="installmentTable">
+    			<th class="installmentTable">Installment</th>
+    			<th class="installmentTable">Installment Amount (Baht)</th>
+    			<th class="installmentTable">Payment Due Date</th>
+                <th class="installmentTable">Remark</th>
+    		</tr>
+    		<aura:iteration items="{!v.installmentList}" var="eachInstallment" indexVar="installmentIndex">
+                <aura:if isTrue="{!!eachInstallment.isToDeleteRecord}">
+            		<tr class="installmentTable">
+            			<td class="installmentTable">
+                            <aura:if isTrue="{!v.typeGroup == 'Expense'}">
+                                <p style="text-align: center; ">งวดที่ {!eachInstallment.InstallmentNumber}  <br/> <div style="font-size: 12px;">{!v.type} </div> </p>
+                                <aura:set attribute="else">
+                                    <p style="text-align: center; font-weight: bold;">{!eachInstallment.InstallmentNumber}</p>
+                                </aura:set>
+                            </aura:if>
+                        </td>
+            			<td class="installmentTable">
+                            <lightning:input class="label-hidden priceInput" type="number" name="{!installmentIndex}" label="" value="{!eachInstallment.InstallmentAmount}" step=".01" onblur="{!c.onblurchangeInstallmentHandler}" onchange="{!c.changeInstallmentHandler}" disabled="{!v.isReadOnly  || and(v.disableForLeasehold,v.isLEASEHOLDSUMMARY)}"/>
+                        </td>
+            			<td class="installmentTable">
+                            <lightning:input class="label-hidden" variant="label-hidden" type="date" name="{!installmentIndex}" label="" value="{!eachInstallment.PaymentDueDate}" disabled="{!(v.isReadOnly || v.disableForLeasehold)}" onchange="{!c.onChangeDatePeriod}" onblur="{!c.onBlurForInstallmentBoxEvent}" dateStyle="short"/>
+                        </td>
+                        <td class="installmentTable">
+                            <lightning:input class="label-hidden" name="{!installmentIndex}" variant="label-hidden" value="{!eachInstallment.remark}" onblur="{!c.onChangeExpense}" disabled="{!v.isReadOnly || v.disableForLeasehold}"/>
+                        </td>
+                        <aura:if isTrue="{!not(v.isReadOnly || v.disableForLeasehold)}">
+                            <td class="installmentTable">
+                                <a onclick="{!c.removeInstallment}" name="{!installmentIndex}">
+                                    <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_small" size="small" alternativeText="Delete Expense"/>
+                                    <span class="slds-assistive-text">Delete Icon</span>
+                                </a>
+                            </td>
+                        </aura:if>
+            		</tr>
+                </aura:if>
+    		</aura:iteration>
+            <tr>
+                <td><p class="slds-m-vertical_small">Total Installment Amount (Baht)</p></td>
+                <td colspan="2"><p class="slds-m-vertical_small"><lightning:formattedNumber value="{!v.totalInstallment}" maximumFractionDigits="2" minimumFractionDigits="2"/></p></td>
+            </tr>
+    	</table>
+</aura:component>

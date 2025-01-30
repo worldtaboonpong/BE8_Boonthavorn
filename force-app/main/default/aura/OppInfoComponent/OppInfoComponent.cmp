@@ -1,0 +1,55 @@
+<aura:component>
+	<aura:attribute name="OppBuilding" type="String" default=""/>
+	<aura:attribute name="ContractStartDate" type="String" default=""/>
+	<aura:attribute name="ContractEndDate" type="String" default=""/>
+	<aura:attribute name="RenewStartDate" type="String"/>
+	<aura:attribute name="RenewEndDate" type="String"/>
+	<aura:attribute name="TotalMeasurmentArea" type="Decimal" default="0"/>
+	<aura:attribute name="TotalLeasableArea" type="Decimal" default="0"/>
+
+	<table class="detail">
+	  	<tr class="detail">
+	  		<td class="slds-col slds-size_1-of-2 detail"  ><p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small ">Building</p></td>
+	  		<td class="slds-col slds-size_1-of-2 detail" ><p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small">{!v.OppBuilding}</p></td>
+	  	</tr>
+	  	<tr class="detail">
+	  		<td class="slds-col slds-size_1-of-2 detail" ><p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small ">Contract Start Date - End Date</p></td>
+	  		<td class="slds-col slds-size_1-of-2 detail" >
+				<p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small">
+				  <ui:outputDate value="{!v.ContractStartDate}" format="DD/MM/YYYY"/>&nbsp; - &nbsp;<ui:outputDate value="{!v.ContractEndDate}" format="DD/MM/YYYY"/>
+				</p>
+			</td>
+	  	</tr>
+
+	  	<aura:if isTrue="{!v.RenewStartDate != null}">
+		  	<tr class="detail">
+		  		<td class="slds-col slds-size_1-of-2 detail" ><p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small ">Renew Start Date - End Date</p></td>
+		  		<td class="slds-col slds-size_1-of-2 detail" >
+					<p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small">
+					  <ui:outputDate value="{!v.RenewStartDate}" format="DD/MM/YYYY"/>&nbsp; - &nbsp;<ui:outputDate value="{!v.RenewEndDate}" format="DD/MM/YYYY"/>
+					</p>
+				</td>
+		  	</tr>
+	  	</aura:if>
+	  	<!-- <tr class="detail">
+	  		<td class="slds-col slds-size_1-of-2 detail" ><p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small ">Contract End Date</p></td>
+	  		<td class="slds-col slds-size_1-of-2 detail" ><p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small"><ui:outputDate value="{!v.ContractEndDate}" format="DD/MM/YYYY"/></p></td>
+	  	</tr> -->
+	  	<tr class="detail">
+	  		<td class="slds-col slds-size_1-of-2 detail" ><p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small ">Total Measurement Area</p></td>
+	  		<td class="slds-col slds-size_1-of-2 detail" >
+	  			<p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small">
+	  				<lightning:formattedNumber value="{!v.TotalMeasurmentArea}" maximumFractionDigits="2"/>
+	  			</p>
+	  		</td>
+	  	</tr>
+	  	<tr class="detail">
+	  		<td class="slds-col slds-size_1-of-2 detail" ><p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small ">Total Leasable Area</p></td>
+	  		<td class="slds-col slds-size_1-of-2 detail" >
+	  			<p class="slds-m-vertical_none slds-align_absolute-center slds-text-heading_small">
+	  				<lightning:formattedNumber value="{!v.TotalLeasableArea}" maximumFractionDigits="2"/>
+	  			</p>
+	  		</td>
+	  	</tr>
+	  </table>
+</aura:component>

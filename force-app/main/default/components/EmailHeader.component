@@ -1,0 +1,11 @@
+<apex:component access="global">
+    <style>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 25%;
+        }
+    </style>
+    <image src="{!URLFOR($Resource.BTA_Logo)}" class="center"/>
+</apex:component>

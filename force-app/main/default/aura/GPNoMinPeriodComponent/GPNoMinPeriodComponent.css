@@ -1,0 +1,11 @@
+.THIS .priceInput input { 
+    text-align: right !important;
+}
+
+.THIS .centerInput input { 
+    text-align: center !important;
+}
+
+.THIS .label-hidden > label {
+    display: none;
+}

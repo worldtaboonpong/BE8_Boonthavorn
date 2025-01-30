@@ -1,0 +1,17 @@
+<aura:component>
+
+	<aura:html tag="style">
+		.confirmModal > .slds-modal__container{
+			width: 30% !important;
+			max-width: 50% !important;
+
+		}
+		.confirmModal > .slds-modal__container  > .slds-modal__content{
+			height: 20% !important;
+		    max-height: inherit	 !important;
+		}
+		
+	</aura:html>
+
+	{!$Label.c.PopupDeleteconfirmation}
+</aura:component>

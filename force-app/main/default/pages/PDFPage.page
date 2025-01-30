@@ -1,0 +1,663 @@
+<apex:page controller="PDFRenderController" renderAs="PDF" applyHtmlTag="false" applyBodyTag="false" showHeader="false" standardStylesheets="false"
+    docType="HTML-5.0">
+    <html>
+
+    <head>
+        <style type="text/css">
+            /* *{
+                font-family: cordia;
+            } */
+
+            img {
+                display: block;
+                page-break-after: avoid;
+                position: relative;
+                image-orientation: from-image;
+            }
+
+            img.pagebreak {
+                display: block;
+                page-break-after: auto;
+                page-break-inside: avoid;
+                position: relative;
+            }
+
+            table {
+                /* border-collapse: collapse;
+                width: 100%;
+                page-break-after: avoid;
+                page-break-before: avoid; */
+                /* border:none; */
+                border-collapse: collapse;
+					/* border: 1px solid #2d2d2d; */
+					width: 100%;
+					page-break-inside: auto;
+					/* page-break-after: avoid; */
+                    /* break-after:avoid */
+                    /* page-break-before: avoid; */
+                    /* border: 1px solid blue ; */
+            }
+
+            table + table{
+                page-break-inside: avoid;
+            }
+            p + table{
+                page-break-inside: avoid;
+            }
+            
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            th,
+            td {
+                /* border: 1px solid black; */
+            }
+
+            table.a {
+                table-layout: auto;
+                width: 180px;
+            }
+
+            table.b {
+                table-layout: fixed;
+                width: 180px;
+            }
+
+            table.c {
+                table-layout: auto;
+                width: 100%;
+            }
+
+            table.d {
+                table-layout: fixed;
+                width: 100%;
+            }
+
+            body {
+                font-family: Arial Unicode MS;
+                font-size: 12px;
+                line-height: 1.2;
+            }
+
+            font {
+                font-family: Arial Unicode MS !important;
+                font-size: 12px;
+                line-height: 1.2;
+            }
+            center{
+                page-break-after: avoid;
+            }
+
+            /* p:has(>table) table{
+                line-height: 1.2;
+                margin-top: 3px;
+                margin-bottom: 0em;
+                padding: 0px;
+                page-break-inside: auto;
+                page-break-after: avoid;
+                border: 1px solid green;
+                 page-break-inside: avoid; 
+                 page-break-after: auto; 
+            } */
+
+            p {
+                line-height: 1.2;
+                margin-top: 3px;
+                margin-bottom: 0em;
+                padding: 0px;
+                padding-top: 2px; 
+                /* page-break-before: avoid; */
+                page-break-inside: avoid;
+                page-break-after: auto;
+                white-space: normal
+                /* border: 1px solid red ; */
+            }
+
+            /* table + table{
+                page-break-after: auto;
+            } */
+            
+            /* table + p{
+                page-break-after: auto;
+            } */
+
+            @page: first {
+                /* margin-top: 1.5cm; */
+            }
+
+            @Page {
+                size: 8.5in 11in;
+                margin:0.7cm 1.5cm;
+                /* margin-top: 3cm; */
+                /* margin-bottom: 0.5cm; */
+                overflow-x: auto;
+                word-wrap: break-word;
+
+                /* add page's header and footer */
+                @top-left {
+                    content: element(header-section);
+                }
+                @top-center {
+                    content: element(header) ;
+                }
+
+                @bottom-center{
+                    content: 'Page ' counter(page) ' of ' counter(pages) " " element(footer);
+                    font-size:10px;
+}
+                /* @top-center{
+                    content : element(headers);
+                } */
+            }
+
+            span{
+                overflow-wrap: break-word;
+                white-space: normal
+            }
+
+
+            /* sets the header as the matching element */
+
+            .header-section {
+                position: running(header-section);
+                left: 0;
+                right: 0;
+                height: 30px;
+                background: #eeeeee;
+            }
+
+            /* sets the footer as the matching element */
+
+            .footer-section {
+                position: running(footer-section);
+                left: 0;
+                right: 0;
+                height: 30px;
+                background: #cccccc;
+            }
+
+            /* add the page number to any matching elements */
+
+            .page-number:before {
+                content: counter(page);
+            }
+
+            /* add the page total to any matching elements */
+
+            .page-count:before {
+                content: counter(pages);
+            }
+
+            /** tms_PDFRoomFloorPage styling */
+
+
+            .roomFloorPage .one-colspan-th {
+                background-color: silver;
+                text-align: center !important;
+                border: 1px solid #2d2d2d;
+            }
+
+            .roomFloorPage .one-colspan-footer {
+                background-color: silver;
+                border: 1px solid #2d2d2d;
+            }
+
+            .roomFloorPage .one-colspan-footer-number {
+                background-color: silver;
+                text-align: right !important;
+                border: 1px solid #2d2d2d;
+            }
+
+            /** tms_PDFRoomFloorPage styling */
+            .text-container{
+                width: 100%;
+                /* word-wrap: break-word; */
+                /* overflow-wrap: break-word; */
+                word-break: break-all;
+                white-space: normal;
+            }
+
+            .contractWording{
+                font-size: 16px;
+                text-align:left;
+                text-indent: 3em;
+                /* border: 1px solid #2d2d2d; */
+                word-wrap: break-word;
+                /* width: 100%; */
+                /* word-break: break-all; */
+                /* white-space: pre-wrap; */
+                /* text-align: justify; */
+            }
+
+            .contractSubWording{
+                font-size:16px;
+                margin-left:3.5em;
+            }
+            .contractFeeSubWording{
+                font-size:16px;
+                margin-left:1em;
+            }
+            .contractUnitWording{
+                font-size:16px;
+                text-align:justify;
+                text-indent: 3em;
+                word-wrap: break-word;
+            }
+
+            .contractWording .redText{
+                color:#ff0000;
+            }
+
+            .contractTable {
+                border: 1px solid #2d2d2d;
+                
+            }
+
+            .contractTable .contractLeft{
+                border: 1px solid #2d2d2d;
+                text-align: left;
+            }
+
+            .contractTable .contractCenter{
+                border: 1px solid #2d2d2d;
+                text-align: center;
+            }
+            
+            .contractTable .header-one {
+                border: 1px solid #2d2d2d;
+                width:"5%";
+                text-align: center;
+            }
+            .contractTable .header-two {
+                border: 1px solid #2d2d2d;
+                width:"25%";
+                text-align: center;
+            }
+            .contractTable .header-three {
+                border: 1px solid #2d2d2d;
+                width:"20%";
+                text-align: center;
+            }
+            .contractTable .header-four {
+                border: 1px solid #2d2d2d;
+                width:"20%";
+                text-align: center;
+            }
+            .contractTable .header-five {
+                border: 1px solid #2d2d2d;
+                width:"30%";
+                text-align: center;
+            }
+            /* .quotaionTable td{
+                /* border-left: 1px solid #2d2d2d; */
+                /* border-right: 1px solid #2d2d2d; */
+                /*border : 1px solid #2d2d2d;
+            } */
+
+            .quotationTable .mainContent{
+                /* border: 1px solid #2d2d2d; */
+                border-left: 1px solid #2d2d2d;
+                border-right: 1px solid #2d2d2d; 
+                border-top: 0px;
+                border-bottom: 0px;
+            }
+
+            .quotationTable .emptyBlock{
+                border: 1px solid #2d2d2d;
+            }
+
+            .quotationTable .running-sequence{
+                border: 1px solid #2d2d2d;
+                border-top: 0px;
+                border-bottom: 0px;
+                text-align: center;
+                vertical-align: top;
+            }
+
+            .quotationTable .description{
+                border: 1px solid #2d2d2d;
+                border-top: 0px;
+                border-bottom: 0px;
+                text-align: left;
+                padding-left: 5px;
+                padding-right: 5px; 
+            }
+
+            .quotationTable .description .subDescription{
+                font-weight: 50;
+            }
+
+            .quotationTable .number{
+                border: 1px solid #2d2d2d;
+                border-top: 0px;
+                border-bottom: 0px;
+                text-align: right;
+            }
+
+            .quotationTable .subText{
+                font-weight: lighter;
+                text-indent: 5%;
+            }
+
+            .quotationTable .unitNo{
+                font-weight: lighter;
+                text-indent: 15%;
+            }
+
+            .quotationTable .unit{
+                text-align: right;
+            }
+
+            .quotationTable .header-one {
+                border: 1px solid #2d2d2d;
+                width:"10%";
+                text-align:center;
+            }
+            .quotationTable .header-two {
+                border: 1px solid #2d2d2d;
+                width:"40%";
+                text-align:center;
+            }
+            .quotationTable .header-three {
+                border: 1px solid #2d2d2d;
+                width:"15%";
+                text-align:center;
+            }
+            .quotationTable .header-four {
+                border: 1px solid #2d2d2d;
+                width:"10%";
+                text-align:center;
+            }
+            .quotationTable .header-five {
+                border: 1px solid #2d2d2d;
+                width:"13%";
+                text-align:center;
+            }
+            .quotationTable .header-six {
+                border: 1px solid #2d2d2d;
+                width:"12%";
+                text-align:center;
+            }
+
+            .quotationTable .footer-one{
+                border: 1px solid #2d2d2d !important;
+                text-align:right;
+                font: bold;
+            }
+            .quotationTable .footer-two{
+                border: 1px solid #2d2d2d !important;
+                text-align:center;
+                font-weight: bold;
+            }
+            .quotationTable .footer{
+                border: 1px solid #2d2d2d !important;
+            }
+
+            .spaceRental{
+                /* border: 1px solid red; */
+                width: 100%;
+                text-align: center;
+                break-before: avoid;
+                page-break-inside: auto;
+                page-break-after: auto;
+                margin-top: 0;
+                
+                /* border: 1px solid red ; */
+                /* position : running(spaceRental); */
+            }
+
+            /* .spaceRental tr{
+                page-break-inside: avoid;
+                page-break-after: auto;
+            } */
+
+            .spaceRentalTable{
+                /* page-break-before: avoid; */
+                border: 1px solid black;
+                /* width: 100%; */
+                margin-right: 5cm;
+                border-collapse: collapse;
+                break-before: avoid;
+                page-break-inside: auto;
+                page-break-after: avoid;
+                -fs-table-paginate: paginate;
+            }
+            .spaceRentalTable tr{
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            .spaceRentalTable td{
+                /* border: 1px solid black ; */
+                /* padding: 2.5px 2px 2.5px 2px; */
+                padding-top: 5px;
+                padding-bottom: 5px;
+                page-break-inside: avoid;
+            }
+
+            .spaceRental .running-sequence{
+                /* border: none; */
+                border-right: 0.5px solid black ;
+                text-align: center;
+                width: 50px;
+                vertical-align: middle;
+            }
+            .spaceRental .title{
+                background: #DDDDDD;
+                text-align: center;
+                border: 0.5px solid black;
+            }
+
+            .spaceRental .header-one{
+                text-align: center;
+                /* border: 0.5px solid black; */
+                border-bottom: 0.5px solid black;
+                /* border: 1px solid black ; */
+                width: 50px;
+            }
+            .spaceRental .header-two{
+                text-align: left;
+                border: 0.5px solid black;
+                border-right: none;
+                /* border: 1px solid black ; */
+                /* width: 100px; */
+            }
+            .spaceRental .item{
+                text-align: left;
+                padding-left: 5px;
+                /* border-right: 0.25px solid black; */
+                /* width: 50px; */
+                /* padding: 0px; */
+            }
+            .spaceRental .itemFee{
+                text-align: left;
+                border-left: 0.5px solid black;
+                /* width: 150px; */
+                padding-left: 5px;
+            }
+            .spaceRental .itemUnit{
+                text-align: left;
+                /* width: 80px; */
+                /* padding: 0px; */
+                /* padding-right: -10px; */
+            }
+            .spaceRental .itemGP{
+                text-align: left;
+                width: 100px;
+                /* padding: 0px; */
+            }
+            .spaceRental .itemUnitGP{
+                text-align: left;
+                width: 150px;
+                /* padding: 0px; */
+                line-break: normal;
+            }
+            .spaceRental .itemFeeGP{
+                text-align: left;
+                width: 150px;
+                /* padding: 0px; */
+
+            }
+            .spaceRental .totaltextGP{
+                text-align: right;
+                width: 180px;
+                /* padding: 0px; */
+                /* padding-right: -10px; */
+            }
+            .spaceRental .totaltext{
+                text-align: left;
+                width: 50px;
+                /* padding: 0px; */
+            }
+            .spaceRental .totalFee{
+                text-align: center;
+                width: 75px;
+                /* padding: 0px; */
+            }
+            .spaceRental .totalUnit{
+                text-align: left;
+                width: 100px;
+                /* padding: 0px; */
+            }
+            
+
+            .width-fit-content {
+                width: 5%;
+                white-space: nowrap;
+            }
+
+            .width-fit-wrap-text {
+                width: 10%;
+                white-space: normal;
+            }
+
+            .content-number {
+                text-align: right !important;
+            }
+
+            .content-align-top {
+                vertical-align: top !important
+            }
+
+            .width-eight {
+                width: 8% !important;
+            }
+
+            .width-twelve {
+                width: 12% !important;
+            }
+
+            .width-fifteen {
+                width: 15% !important;
+            }
+
+            .width-sixteen {
+                width: 16% !important;
+            }
+
+            .width-eightteen {
+                width: 18% !important;
+            }
+
+            .width-twentythree {
+                width: 23% !important;
+            }
+
+            .width-twentyfive {
+                width: 25% !important;
+            }
+
+            .padding-left-10px {
+                padding-left: 10px;
+            }
+
+
+            /** end of -- tms_PDFRoomFloorPage styling */
+
+            /** tms_PDFPriceMappingPage styling */
+
+        
+
+            /** end of -- tms_PDFCarriedDepositPage styling */
+
+            
+
+            /** end of -- tms_PDFDepositInstallmentPage styling */
+
+
+            .imageCenter {
+                margin: auto;
+                width: 200px;
+            }
+
+            .imageQuotation {
+                margin: auto;
+                width: 280px;
+                page-break-before: avoid;
+                /* height: 200px; */
+                height:500px;
+            }
+
+            .fontNormal,
+            p,
+            table {
+                color: #2d2d2d;
+            }
+
+            .fontBold {
+                /* color: #000000; */
+            }
+
+            .furniturePage {
+                margin-top: -13px;
+            }
+
+            /* .maintainCamAirService, .entranceFeePage{
+					margin-top: -10px;
+				}
+				.publicUtilityPage{
+					margin-top: -6px;
+				} */
+
+            .tableFormEditor td {
+                border: 1px solid #2d2d2d;
+                !important;
+            }
+            
+            .resetCounter{
+                -fs-page-sequence: start;
+            }
+            .ContractFooter{
+                display: block; 
+                text-align: center; 
+                position: running(footer);
+                /* margin-top: 5px; */
+                margin-bottom: 5px;
+            }
+            
+            
+            /* div.pageCounter{
+                content: "Page " counter(page) ' of ' counter(page);
+            } */
+        </style>
+    </head>
+
+    <body class="fontNormal">
+        <div class="content ">
+            <apex:repeat value="{!contentList}" var="content">
+                <apex:outputText value="{!content.Display_Content__c}" escape="false" />
+            </apex:repeat>
+        </div>
+            <!-- footer -->
+            
+        <!-- "Draft Water Mark code" -->
+        <apex:image id="theImage" value="{!$Resource.DraftWaterMask}" width="100%" height="100%" alt="Description of image here"
+            style="position: fixed;background-repeat:repeat;left: 0cm; top:0cm; z-index:0" rendered="{!isDraftRenderred}" />
+        <!-- <img src="{!URLFOR($Resource.DraftWaterMask)}" width="100%" height="100%" style="position: fixed;background-repeat:repeat;left: 0cm; top:0cm; z-index:0"
+        /> -->
+    </body>
+
+    </html>
+</apex:page>

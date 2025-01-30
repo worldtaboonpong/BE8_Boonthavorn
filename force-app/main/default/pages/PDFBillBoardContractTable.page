@@ -1,0 +1,36 @@
+<apex:page standardController="Contract__c" extensions="OppPDFSubPageController" showHeader="false" sidebar="false" standardStylesheets="false"
+    applyBodyTag="false" applyHtmlTag="false">
+
+    <div class="contractTable">
+        <table width="100%">
+            <tr>
+                <td class="header-one">ลำดับที่
+                </td>
+                <td class="header-two">ป้าย
+                </td>
+                <td class="header-three">รหัสตำแหน่งป้าย
+                </td>
+                <td class="header-four">ขนาด
+                </td>
+                <td class="header-five"> ระยะการเช่า
+                </td>
+            </tr>
+            <apex:variable value="{!1}" var="sequence" />
+            <!-- <apex:variable value="{!0}" var="list" /> -->
+            <apex:repeat value="{!BillBoardContractData.unitCodeList}" var="unit">
+                <tr>
+                    <td class="contractCenter">{!sequence}</td>
+                    <td class="contractCenter">{!BillBoardContractData.bannerLabelList[unit]}</td>
+                    <td class="contractCenter">{!unit}</td>
+                    <td class="contractCenter">{!BillBoardContractData.bannerSizeList[unit]}</td>
+                    <!-- <td class="contractCenter">{!10}</td> -->
+                    <td class="contractCenter">{!BillBoardContractData.rentPeriod[unit]} เดือน</td>
+                </tr>
+                <!-- <apex:variable value="{!list+1}" var="list" /> -->
+                <apex:variable value="{!sequence+1}" var="sequence" />
+            </apex:repeat>
+
+        </table>
+    </div>
+
+</apex:page>

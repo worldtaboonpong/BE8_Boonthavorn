@@ -1,0 +1,17 @@
+<aura:component implements="force:appHostable,force:lightningQuickActionWithoutHeader,flexipage:availableForAllPageTypes,force:hasRecordId" access="global" controller="PDFController">
+
+	<aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+	<aura:attribute name="recordId" type="Id" />
+	<aura:attribute name="toggleSpinner" type="Boolean" default="false" />
+
+	<aura:if isTrue="{!v.toggleSpinner}">
+	    <div  aura:id="spinnerId" class="slds-spinner_container">
+	        <div role="status" class="slds-spinner slds-spinner_medium">
+	                <span class="slds-assistive-text">Loading</span>
+	                <div class="slds-spinner__dot-a"></div>
+	                <div class="slds-spinner__dot-b"></div>
+	        </div>
+	    </div>
+	</aura:if>
+
+</aura:component>

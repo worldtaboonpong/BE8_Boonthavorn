@@ -1,0 +1,31 @@
+<apex:page standardController="Contract__c" extensions="OppPDFSubPageController" showHeader="false" sidebar="false" standardStylesheets="false"
+    applyBodyTag="false" applyHtmlTag="false">
+
+    <div class="text-container">
+        <p class="contractWording">
+            <span style="font-size:16px;">ระยะเวลาการเช่าตามสัญญานี้
+                <!-- apex outputtext check for multiple room -->
+                <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize == 1}">
+                    มีระยะเวลาทั้งสิ้น {!Contract__c.Rental_Period_for_Document__c} โดยเริ่มนับตั้งแต่วันที่ {!Contract__c.Contract_Start_Date_for_Document__c}
+                    ถึงวันที่ {!Contract__c.Contract_End_Date_for_Document__c}
+                </apex:outputText>
+                <apex:variable value="{!1}" var="list" />
+                <apex:outputText rendered="{!ContractFeePeriod_Space.unitListSize > 1}">
+                    <apex:repeat value="{!ContractFeePeriod_Space.rentalUnit}" var="unit">
+                        <p class="contractSubWording">
+                            - ห้องเลขที่ {!unit} มีระยะเวลาทั้งสิ้น {!Contract__c.Rental_Period_for_Document__c} โดยเริ่มนับตั้งแต่วันที่ {!Contract__c.Contract_Start_Date_for_Document__c}
+                            ถึงวันที่ {!Contract__c.Contract_End_Date_for_Document__c}
+                            <apex:outputText rendered="{!list < ContractFeePeriod_Space.unitListSize }">
+                                และ
+                                <apex:variable value="{!list+1}" var="list" />
+                            </apex:outputText>
+                        </p>
+                    </apex:repeat>
+                </apex:outputText>
+            </span>
+        </p>
+        <!-- End -->
+    </div>
+</apex:page>
+
+<!-- ระยะเวลาการเช่าตามสัญญานี้ มีระยะเวลาทั้งสิ้น {FIELD:Rental_Period_for_Document__c} โดยเริ่มนับตั้งแต่วันที่ {FIELD:Contract_Start_Date_for_Document__c} ถึงวันที่ {FIELD:Contract_End_Date_for_Document__c} -->

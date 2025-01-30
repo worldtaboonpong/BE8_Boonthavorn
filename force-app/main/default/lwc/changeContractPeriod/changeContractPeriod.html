@@ -1,0 +1,45 @@
+<template>
+    <lightning-quick-action-panel header="Edit Fields Action">
+        <div if:true={isLoading} >
+            <div class="slds-spinner_container">
+                <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative">
+                  <span class="slds-assistive-text">Loading</span>
+                  <div class="slds-spinner__dot-a"></div>
+                  <div class="slds-spinner__dot-b"></div>
+                </div>
+              </div>
+        </div>
+        <lightning-record-edit-form record-id={recordId}
+                                    object-api-name={objectApiName}
+                                    onload={handleOnLoad}
+                                    onsubmit={handleSubmit}
+                                    onerror={handleError}
+                                    onsuccess={handleSuccess}>
+            <lightning-layout multiple-rows>
+                <lightning-layout-item size="6" padding="around-small">
+                    <lightning-input-field field-name="Contract_Start_Date__c" onchange={handleChange}></lightning-input-field>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" padding="around-small">
+                    <lightning-output-field field-name="Rental_Year__c"></lightning-output-field>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" padding="around-small">
+                    <lightning-input type="date" label="Contract End Date" value={endDate} disabled=""></lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" padding="around-small">
+                    <lightning-output-field field-name="Rental_Period_Month__c"></lightning-output-field>
+                </lightning-layout-item>
+                <lightning-layout-item size="6" padding="around-small">
+                    
+                </lightning-layout-item>
+                <lightning-layout-item size="6" padding="around-small">
+                    <lightning-output-field field-name="Rental_day__c"></lightning-output-field>
+                </lightning-layout-item>
+                
+            </lightning-layout>
+            <footer class="slds-modal__footer">
+                <lightning-button variant="neutral" label="Cancel" onclick={handleCancel}></lightning-button>
+                <lightning-button variant="brand" class="slds-m-left_x-small" label="Save" type="submit"></lightning-button>
+            </footer>
+        </lightning-record-edit-form>
+    </lightning-quick-action-panel>
+</template>

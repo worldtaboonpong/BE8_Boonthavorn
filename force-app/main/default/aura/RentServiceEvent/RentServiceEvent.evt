@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT">
+	<aura:attribute name="isSelectRenServiceAdvance" type="Boolean" />
+	<aura:attribute name="isSelectRenServiceEscalation" type="Boolean" />
+</aura:event>

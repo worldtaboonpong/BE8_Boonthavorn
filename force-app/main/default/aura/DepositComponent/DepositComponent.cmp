@@ -1,0 +1,495 @@
+<aura:component access="global" controller="QuotationPrepController">
+	<aura:handler name="init" value="{! this }" action="{! c.init }"/>
+	<aura:attribute name="depositMonth" type="Decimal" default="0"/>
+	<aura:attribute name="numberOfInstallment" type="Decimal" default="0"/>
+	<aura:attribute name="sumTotalDeposit" type="Decimal" default="0"/>
+	<aura:attribute name="totalInstallment" type="Decimal" default="0" />
+	<aura:attribute name="originalCAMTotalDeposit" type="Decimal" default="0" />
+	<aura:attribute name="depositCalculationType" type="String" default="systemCal"/>
+	<aura:attribute name="depositObject" type="Object" default="{}"/>
+	<aura:attribute name="depositInputMethodOption" type="List" default="[]"/>
+	<aura:attribute name="depositOption" type="List" default="[]"/>
+	<aura:attribute name="expenseDepositTypeOption" type="List"/>
+	<aura:attribute name="paymentMethod" type="List" default="[]"/>
+	<aura:attribute name="isChangeDeposit" type="Boolean" default="false" />
+	<aura:attribute name="disabledAddDeposit" type="Boolean" default="false"/>
+
+	<aura:attribute name="camPricing" type="Object" default="{}"/>
+	<aura:attribute name="periodPricing" type="List" default="[]"/>
+	<aura:attribute name="oppObject" type="Object" default="{}"/>
+	<aura:attribute name="isReadOnly" type="Boolean" default="false" />
+	<aura:attribute name="isEditPaymentDueDate" type="Boolean" default="false" />
+	<aura:attribute name="isConfirmRemove" type="Boolean" default="false"/>
+
+	<lightning:overlayLibrary aura:id="confirmOverlay"/>
+
+	<aura:handler name="otherDepositObjectEvent" event="c:OtherDepositInstalmentEvent" action="{!c.handleComponentEvent}"/>
+
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small slds-box slds-box_x-small slds-theme_shade">
+		<div class="slds-col slds-size_1-of-2">
+				<h1 class="slds-text-heading_medium">Security Deposit</h1>
+		</div>
+	</div>
+
+
+
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+		<table>
+			<tr>
+				<td><p class="slds-m-vertical_x-small label-hidden">Deposit (Month)</p></td>
+				<td><lightning:input class="slds-size_2-of-3" type="number" name="depositMonthInput" label="" value="{!v.depositObject.DepositMonth}" step=".01" disabled = "{!v.isReadOnly}" onchange="{!c.onChangeDepositMonth}"/></td>
+			</tr>
+			<tr>
+				<td><p class="slds-m-vertical_x-small">Number of Installments</p></td>
+				<td>
+					<!-- <lightning:input class="slds-size_2-of-3" type="number" name="numberOfInstallmentInput" label="" value="{!v.depositObject.NumberOfInstallment}" disabled = ""/> -->
+
+					<div class="slds-grid slds-gutters ">
+                        <div class="slds-col slds-size_1-of-3">
+            			     <lightning:input class="slds-size_2-of-3" type="number" name="numberOfInstallmentInput" label="" value="{!v.depositObject.NumberOfInstallment}" step="1" disabled = "true"/>
+                        </div>
+                        <!-- <div class="slds-col slds-size_1-of-3">
+                        	<aura:if isTrue="{!not(v.isReadOnly)}">
+	            		     	<lightning:button class="slds-m-top_x-large" variant="brand" label="Add Installment" title="Add Installment" onclick="{!c.addInstallment}" disabled = "{!v.isReadOnly}" />
+                        	</aura:if>
+                        </div> -->
+
+                    </div>
+
+				</td>
+
+
+			</tr>
+			<tr>
+				<!-- <td><ui:inputRadio class="slds-m-vertical_x-small" aura:id="systemCal" name="camType" label="System Calculation" change="{!c.depositCalMethoChangeHandler}" value="true"/></td>
+				<td><ui:inputRadio class="slds-m-vertical_x-small" aura:id="advanceCal" name="camType" label="Advance" change="{!c.depositCalMethoChangeHandler}" /></td> -->
+				<td colspan="2">
+					
+					<lightning:radioGroup
+			                      label=""
+			                      options="{! v.depositInputMethodOption }"
+			                      value="{!v.depositObject.DepositCalculationType}"
+			                      type="radio"
+			                      class="customRadioCls"
+			                      onchange="{!c.depositCalMethoChangeHandler}"
+			                      disabled = "{!v.isReadOnly}"/>
+				</td>
+			</tr>
+		</table>
+
+	</div>
+
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small slds-box slds-box_x-small slds-theme_shade">
+		<div class="slds-col slds-size_1-of-2">
+				<h1 class="slds-text-heading_medium">Deposit Summary Before VAT</h1>
+		</div>
+	</div>
+
+	<p>
+		<lightning:icon iconName="utility:info" alternativeText="Utility info" title="info" size="x-small"/>
+		ตาราง Deposit และ Installment จะเป็นการกรอกค่าที่ยังไม่รวม VAT
+	</p>
+
+	<aura:if isTrue="{!v.depositObject.DepositCalculationType == 'Advance'}">
+		<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+			<table>
+				<tr>
+					<td><p class="slds-m-vertical_x-small">Deposit Amount</p></td>
+					<td><lightning:input class="slds-size_2-of-3" type="number" name="depositAmountInput" label="" value="{!v.depositObject.DepositSummary.AdvanceDepositAmount}" onblur="{!c.onBlurChangeDepositAmount}" step=".01" disabled = "{!v.isReadOnly}" onchange="{!c.onChangeDepositAmount}"/></td>
+				</tr>
+			</table>
+		</div>
+	</aura:if>
+
+	<aura:if isTrue="{!v.oppObject.isAllowChangeOptionToRenew}">
+		<h2 class="slds-text-heading_medium slds-m-vertical_x-small">เงินประกันที่ยกยอดมาจากสัญญาเดิม</h2>
+		<div class="slds-m-vertical_x-small">
+			<table class="depositTable" style="font-size: 12px !important;">
+				<tr class="depositTable">
+					<th class="depositTable">Old Contract Deposit</th>
+					<!--<th class="depositTable">Bank Guaruntee</th>
+					<th class="depositTable">Cash</th>-->
+					<th class="depositTable">Amount</th>
+				</tr>
+				<tr class="depositTable">
+					<td class="depositTable">
+						{!v.depositObject.DepositSummary.ParentContractPaidDeposit.rent_DepositType}
+					</td>
+					<!--<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.ParentContractPaidDeposit.rent_BankGuaruntee}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.ParentContractPaidDeposit.rent_Cash}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>-->
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.ParentContractPaidDeposit.rent_Summary}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+				</tr>
+				<tr class="depositTable">
+					<td class="depositTable">
+						{!v.depositObject.DepositSummary.ParentContractPaidDeposit.service_DepositType}
+					</td>
+					<!--<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.ParentContractPaidDeposit.service_BankGuaruntee}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.ParentContractPaidDeposit.service_Cash}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>-->
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.ParentContractPaidDeposit.service_Summary}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+				</tr>
+				<aura:if isTrue="{!v.depositObject.DepositSummary.ParentContractPaidDeposit.camOrAirService_DepositType == 'CAM'}">
+					<tr class="depositTable">
+						<td class="depositTable">
+							{!v.depositObject.DepositSummary.ParentContractPaidDeposit.camOrAirService_DepositType}
+						</td>
+						<!--<td class="depositTable priceInput">
+							<lightning:formattedNumber value="{!v.depositObject.DepositSummary.ParentContractPaidDeposit.camOrAirService_BankGuaruntee}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+						</td>
+						<td class="depositTable priceInput">
+							<lightning:formattedNumber value="{!v.depositObject.DepositSummary.ParentContractPaidDeposit.camOrAirService_Cash}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+						</td>-->
+						<td class="depositTable priceInput">
+							<lightning:formattedNumber value="{!v.depositObject.DepositSummary.ParentContractPaidDeposit.camOrAirService_Summary}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+						</td>
+					</tr>
+				</aura:if>
+				<tr class="depositTable">
+					<td class="depositTable">
+						Total
+					</td>
+					<!--<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!(v.depositObject.DepositSummary.ParentContractPaidDeposit.camOrAirService_BankGuaruntee +
+															 v.depositObject.DepositSummary.ParentContractPaidDeposit.service_BankGuaruntee +
+															 v.depositObject.DepositSummary.ParentContractPaidDeposit.rent_BankGuaruntee)}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!(v.depositObject.DepositSummary.ParentContractPaidDeposit.camOrAirService_Cash +
+															 v.depositObject.DepositSummary.ParentContractPaidDeposit.service_Cash +
+															 v.depositObject.DepositSummary.ParentContractPaidDeposit.rent_Cash)}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>-->
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!(v.depositObject.DepositSummary.ParentContractPaidDeposit.camOrAirService_Summary +
+															 v.depositObject.DepositSummary.ParentContractPaidDeposit.service_Summary +
+															 v.depositObject.DepositSummary.ParentContractPaidDeposit.rent_Summary)}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</aura:if>
+
+	<aura:if isTrue="{!v.oppObject.isAllowChangeOptionToRenew &#38;&#38; v.oppObject.isNoCAM &#38;&#38; !v.oppObject.parentContractIsNoCAM}">
+		<p>
+			<lightning:icon iconName="utility:info" alternativeText="Utility info" title="info" size="x-small"/>
+			{!$Label.c.RenewDepositNoCAM}
+		</p>
+	</aura:if>
+
+	<h2 class="slds-text-heading_medium slds-m-vertical_x-small">เงินประกัน</h2>
+	<div class="slds-m-vertical_x-small">
+		<table class="depositTable" style="font-size: 12px !important;">
+			<tr class="depositTable">
+				<th class="depositTable">Deposit</th>
+				<th class="depositTable">Last Monthly Rate</th>
+				<!-- <th class="depositTable">Vat 7%</th> -->
+				<!-- <th class="depositTable">Last Monthly Rate (With VAT)</th> -->
+				<th class="depositTable">Total Deposit</th>
+				<aura:if isTrue="{!v.oppObject.isAllowChangeOptionToRenew}">
+					<th class="depositTable">Carried Deposit</th>
+					<th class="depositTable">Actual Deposit</th>
+				</aura:if>
+				<th class="depositTable">Summary</th>
+				<!-- <th class="depositTable">Summary(with VAT)</th> -->
+			</tr>
+				<tr class="depositTable">
+					<td class="depositTable">
+						{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_DepositType}
+					</td>
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_LastMonthlyRate}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+					<!-- <td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_Vat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td> -->
+					<!-- <td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_LastMonthlyRateWithVat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td> -->
+					<td class="depositTable priceInput">
+						<lightning:input  class="slds-size_3-of-3 label-hidden priceInput" step=".01" type="number" name="" label="" value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_TotalDeposit}" disabled = "{!(v.isReadOnly)? v.isReadOnly : (v.depositObject.DepositCalculationType == 'Advance')?false:true}" onchange="{!c.onchangeCarrierDeposit}" onblur="{!c.onblurCarrierDeposit}"/>
+						<!-- <lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_TotalDeposit}" maximumFractionDigits="2" minimumFractionDigits="2"/> -->
+					</td> 
+					<aura:if isTrue="{!v.oppObject.isAllowChangeOptionToRenew}">
+						<td class="depositTable">
+							<lightning:input class="slds-size_3-of-3 label-hidden priceInput" step=".01" type="number" name="" label="" value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_CarriedDeposit}" disabled = "{!v.isReadOnly}" onchange="{!c.onchangeCarrierDeposit}" onblur="{!c.onblurCarrierDeposit}"/>
+						</td>
+						<td class="depositTable priceInput">
+							<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_ActualDeposit}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+						</td>
+					</aura:if>
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_Summary}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+					<!-- <td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_Summary_WithVat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td> -->
+				</tr>
+				<tr class="depositTable">
+					<td class="depositTable">
+						{!v.depositObject.DepositSummary.DepositSummaryPricing.service_DepositType}
+					</td>
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.service_LastMonthlyRate}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+					<!-- <td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.service_Vat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td> -->
+					<!-- <td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.service_LastMonthlyRateWithVat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td> -->
+					<td class="depositTable">
+						<!-- <lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.service_TotalDeposit}" maximumFractionDigits="2" minimumFractionDigits="2"/> -->
+						<lightning:input class="slds-size_3-of-3 label-hidden priceInput" type="number" name="" label="" value="{!v.depositObject.DepositSummary.DepositSummaryPricing.service_TotalDeposit}" step=".01" disabled = "{!(v.isReadOnly)? v.isReadOnly : (v.depositObject.DepositCalculationType == 'Advance')?false:true}" onchange="{!c.onchangeCarrierDeposit}" onblur="{!c.onblurCarrierDeposit}" />
+					</td>
+					<aura:if isTrue="{!v.oppObject.isAllowChangeOptionToRenew}">
+						<td class="depositTable">
+							<lightning:input class="slds-size_3-of-3 label-hidden priceInput" type="number" name="" label="" value="{!v.depositObject.DepositSummary.DepositSummaryPricing.service_CarriedDeposit}" step=".01" disabled = "{!v.isReadOnly}" onchange="{!c.onchangeCarrierDeposit}" onblur="{!c.onblurCarrierDeposit}"/>
+						</td>
+						<td class="depositTable priceInput">
+							<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.service_ActualDeposit}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+						</td>
+					</aura:if>
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.service_Summary}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+					<!-- <td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.service_Summary_WithVat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td> -->
+				</tr>
+				<aura:if isTrue="{!not(v.oppObject.isNoCAM)}">
+					<aura:if isTrue="{!v.oppObject.camOrAirService == 'CAM'}">
+						<tr class="depositTable">
+							<td class="depositTable">
+								{!v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_DepositType}
+							</td>
+							<td class="depositTable priceInput">
+								<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_LastMonthlyRate}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+							</td>
+							<!-- <td class="depositTable priceInput">
+								<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_Vat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+							</td> -->
+							<!-- <td class="depositTable priceInput">
+								<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_LastMonthlyRateWithVat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+							</td> -->
+							<td class="depositTable priceInput">
+								<!-- <lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_TotalDeposit}" maximumFractionDigits="2" minimumFractionDigits="2"/> -->
+								<lightning:input class="slds-size_3-of-3 label-hidden priceInput" type="number" name="" label="" value="{!v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_TotalDeposit}" step=".01" disabled = "{!(v.isReadOnly)? v.isReadOnly : (v.depositObject.DepositCalculationType == 'Advance')?false:true}" onchange="{!c.onchangeCarrierDeposit}" onblur="{!c.onblurCarrierDeposit}"/>
+							</td>
+							<aura:if isTrue="{!v.oppObject.isAllowChangeOptionToRenew}">
+								<td class="depositTable">
+									<lightning:input class="slds-size_3-of-3 label-hidden priceInput" type="number" name="" label="" value="{!v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_CarriedDeposit}" step=".01" disabled = "{!v.isReadOnly}" onchange="{!c.onchangeCarrierDeposit}" onblur="{!c.onblurCarrierDeposit}"/>
+								</td>
+								<td class="depositTable priceInput">
+									<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_ActualDeposit}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+								</td>
+							</aura:if>
+							<td class="depositTable priceInput">
+								<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_Summary}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+							</td>
+							<!-- <td class="depositTable priceInput">
+								<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_Summary_WithVat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+							</td> -->
+						</tr>
+					</aura:if>
+				</aura:if>
+			<tr class="depositTable">
+				<td class="depositTable">Total</td>
+				<td class="depositTable priceInput">
+					<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_LastMonthlyRate+
+																			v.depositObject.DepositSummary.DepositSummaryPricing.service_LastMonthlyRate +
+																			v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_LastMonthlyRate}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+				</td>
+
+				<!-- <td class="depositTable priceInput">
+					<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_Vat +
+																			v.depositObject.DepositSummary.DepositSummaryPricing.service_Vat +
+																			v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_Vat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+				</td> -->
+
+				<!-- <td class="depositTable priceInput">
+					<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.rent_LastMonthlyRateWithVat +
+																			v.depositObject.DepositSummary.DepositSummaryPricing.service_LastMonthlyRateWithVat +
+																			v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_LastMonthlyRateWithVat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+				</td> -->
+
+				<td class="depositTable priceInput"><lightning:formattedNumber 
+					value="{!(v.depositObject.DepositCalculationType == 'Advance')?v.sumTotalDeposit:(v.depositObject.DepositSummary.DepositSummaryPricing.rent_TotalDeposit +
+																								v.depositObject.DepositSummary.DepositSummaryPricing.service_TotalDeposit +
+																								v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_TotalDeposit)}" maximumFractionDigits="2" minimumFractionDigits="2"/></td>
+				
+				<aura:if isTrue="{!v.oppObject.isAllowChangeOptionToRenew}">
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!(v.depositObject.DepositSummary.DepositSummaryPricing.rent_CarriedDeposit*1) +
+																				(v.depositObject.DepositSummary.DepositSummaryPricing.service_CarriedDeposit*1) +
+																				(v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_CarriedDeposit*1)}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+				
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!(v.depositObject.DepositSummary.DepositSummaryPricing.camOrAirService_ActualDeposit*1) +
+																			(v.depositObject.DepositSummary.DepositSummaryPricing.rent_ActualDeposit*1) +
+																			(v.depositObject.DepositSummary.DepositSummaryPricing.service_ActualDeposit*1)}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+				</aura:if>
+				<td class="depositTable priceInput">
+					<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.totalDeposit}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+				</td>
+				<!-- <td class="depositTable priceInput">
+					<lightning:formattedNumber value="{!v.depositObject.DepositSummary.DepositSummaryPricing.totalDeposit_WithVat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+				</td> -->
+
+			</tr>
+		</table>
+	</div>
+
+	<aura:if isTrue="{!v.oppObject.isAllowChangeOptionToRenew}">
+		<div class="slds-m-vertical_x-small">
+			<lightning:radioGroup
+		      label="Deposit Option"
+		      options="{! v.depositOption }"
+		      value="{!v.depositObject.DepositOption}"
+		      type="radio"
+		      class="customRadioCls"
+		      onchange="{!c.depositOptionChangeHandler}"
+		      disabled = "{!v.isReadOnly}"/>
+		</div>
+	</aura:if>
+
+	<div class="slds-m-vertical_x-small">
+		<aura:if isTrue="{!not(v.isReadOnly)}">
+			 <lightning:button class="slds-m-top_x-small" variant="brand" label="Add Installment" title="Add Installment" onclick="{!c.addInstallment}" disabled = "{!(v.isReadOnly)?true:(((v.depositObject.DepositSummary.DepositSummaryPricing.totalDeposit le 0)) ? true : false)}" />
+		</aura:if>
+	</div>
+	
+	<div class="slds-m-vertical_x-small">
+		<div class="slds-size_8-of-8">
+			<table class="depositTable" style="font-size: 12px !important;">
+				<tr class="depositTable">
+					<th class="depositTable">Installment</th>
+					<th class="depositTable">Installment Amount</th>
+					<th class="depositTable">VAT (Service Only)</th>
+					<th class="depositTable">Installment Amount with VAT</th>
+					<th class="depositTable">Payment Method</th>
+					<th class="depositTable">Payment Due Date</th>
+					<th class="depositTable">Remark</th>
+				</tr>
+				<aura:iteration items="{!v.depositObject.DepositSummary.InstallmentList}" var="eachDepositSummaryInstallmentList" indexVar="installmentIndex">
+					<aura:if isTrue="{!!eachDepositSummaryInstallmentList.isToDeleteRecord}">
+						<tr class="depositTable">
+							<td class="depositTable">
+								<p style="text-align: center;">งวดที่ {!eachDepositSummaryInstallmentList.InstallmentNumber} <br/>
+									<div style="font-size: 12px;">{!v.depositObject.DepositSummary.Type}</div></p>
+							</td>
+							<td class="depositTable">
+								<lightning:input class="slds-m-vertical_x-small label-hidden priceInput" type="number" name="{!installmentIndex}" label="" value="{!eachDepositSummaryInstallmentList.InstallmentAmount}" step=".01" onchange="{!c.changeInstallmentHandler}" onblur="{!c.onblurchangeInstallmentHandler}" disabled = "{!(v.isReadOnly)?true:((v.oppObject.isAllowChangeOptionToRenew)? ((v.depositObject.DepositSummary.DepositSummaryPricing.totalDeposit le 0) ? true: false) : false)}"/>
+							</td>
+							<td class="depositTable">
+								<lightning:input class="slds-m-vertical_x-small label-hidden priceInput" type="number" name="" label="" value="{!eachDepositSummaryInstallmentList.InstallmentVAT}" step=".01" disabled="true"/>
+							</td>
+							<td class="depositTable">
+								<lightning:input class="slds-m-vertical_x-small label-hidden priceInput" type="number" name="" label="" value="{!eachDepositSummaryInstallmentList.InstallmentAmountWithVat}" step=".01" disabled="true"/>
+							</td>
+							<td class="depositTable">
+								<lightning:select class="label-hidden" name="" label=""  value="{!eachDepositSummaryInstallmentList.PaymentMethod}" onchange="{!c.onChangeDeposit}" disabled = "{!(v.isReadOnly)?true:((v.oppObject.isAllowChangeOptionToRenew)? ((v.depositObject.DepositSummary.DepositSummaryPricing.totalDeposit le 0) ? true: false) : false)}">
+									<aura:if isTrue="{!v.oppObject.isAllowChangeOptionToRenew}">
+										<option text="-None-" value=""/>
+									</aura:if>
+							        <aura:iteration items="{!v.paymentMethod}" var="option">
+							            <option text="{!option.label}" value="{!option.value}"/>
+							        </aura:iteration>
+							    </lightning:select>
+							</td>
+							<td class="depositTable">
+								<lightning:input class="label-hidden" variant="label-hidden" type="date" name="{!installmentIndex}" label="" value="{!eachDepositSummaryInstallmentList.PaymentDueDate}" onchange="{!c.onChangeDatePeriod}" disabled = "{!((v.isReadOnly)?true:((v.oppObject.isAllowChangeOptionToRenew)? ((v.depositObject.DepositSummary.DepositSummaryPricing.totalDeposit le 0) ? true: false) : false))}" dateStyle="short"/>
+							</td>
+							<td class="depositTable">
+	                            <lightning:input class="label-hidden" variant="label-hidden" value="{!eachDepositSummaryInstallmentList.remark}" onblur="{!c.onChangeDeposit}" disabled="{!(v.isReadOnly)?true:((v.oppObject.isAllowChangeOptionToRenew)? ((v.depositObject.DepositSummary.DepositSummaryPricing.totalDeposit le 0) ? true: false) : false)}"/>
+	                        </td>
+							<aura:if isTrue="{!(v.isReadOnly)?false:(((v.depositObject.DepositSummary.DepositSummaryPricing.totalDeposit le 0 )) ? false : true)}">
+								<td class="installmentTable">
+			                        <a onclick="{!c.removeInstallment}" name="{!installmentIndex}">
+			                            <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_small" size="small" alternativeText="Delete Expense"/>
+			                            <span class="slds-assistive-text">Delete Icon</span>
+			                        </a>
+		                    	</td>
+							</aura:if>
+						</tr>
+					</aura:if>
+				</aura:iteration>	
+				
+				<tr class="depositTable">
+					<td class="depositTable">Total</td>
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.TotalInstallment}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.TotalInstallment_VAT}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+					<td class="depositTable priceInput">
+						<lightning:formattedNumber value="{!v.depositObject.DepositSummary.TotalInstallment_WithVat}" maximumFractionDigits="2" minimumFractionDigits="2"/>
+					</td>
+					<td class="depositTable"></td>
+					<td class="depositTable"></td>
+				</tr>
+			</table>
+    	</div>
+		
+	</div>
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small">
+		<div class="slds-size_2-of-3">
+			<div class="slds-size_1-of-3">
+				<p class="slds-m-vertical_x-small">Remark</p>
+			</div>
+			<div class="slds-size_2-of-3">
+				<lightning:textarea class="label-hidden" name="remarkInput" label="" value="{!v.depositObject.DepositRemark}" onchange="{!c.onChangeDeposit}" disabled = "{!v.isReadOnly}"/>
+			</div>
+		</div>
+	</div>
+
+	<div class="slds-grid slds-gutters slds-m-vertical_x-small slds-box slds-box_x-small slds-theme_shade">
+		<div class="slds-col slds-size_1-of-2">
+				<h1 class="slds-text-heading_medium">Other Deposit</h1>
+		</div>
+		<div class="slds-col slds-size_1-of-2">
+			<lightning:button class="slds-float_right" variant="brand" label="Add Deposit" title="Add Deposit" onclick="{!c.addOtherDeposit}" disabled = "{!v.isReadOnly||v.disabledAddDeposit}"/>
+		</div>
+	</div>
+
+	<div class="slds-m-top_small slds-is-expanded">
+		<aura:iteration items="{!v.depositObject.OtherDepositList}" var="eachOtherDeposit" indexVar="otherDepositIndex">
+			<aura:if isTrue="{!!eachOtherDeposit.isToDeleteRecord}">
+				<div class="slds-box slds-is-expanded slds-m-bottom_small">
+					<div class="slds-clearfix">
+		                <div class="slds-float_right">
+		                	<aura:if isTrue="{!not(v.isReadOnly)}">
+			                    <a onclick="{!c.removeOtherDeposit}" name="{!otherDepositIndex}">
+			                        <lightning:icon variant="error" iconName="utility:clear" class="slds-icon slds-icon_small" size="small" alternativeText="Delete Expense"/>
+			                        <span class="slds-assistive-text">Delete Icon</span>
+			                    </a>
+		                	</aura:if>
+		                </div>
+		            </div>
+					<c:DepositBoxComponent
+					OtherDepositIndex = "{!otherDepositIndex}" 
+					eachOtherDeposit="{!eachOtherDeposit}" 
+					expenseDepositTypeOption="{!v.expenseDepositTypeOption}"
+					isChangeDeposit="{!v.isChangeDeposit}"
+					isReadOnly="{!v.isReadOnly}"
+					isEditPaymentDueDate="{!v.isEditPaymentDueDate}"
+					oppObject="{!v.oppObject}"
+					/>
+				</div>
+			</aura:if>
+		</aura:iteration>
+	</div>
+
+</aura:component>

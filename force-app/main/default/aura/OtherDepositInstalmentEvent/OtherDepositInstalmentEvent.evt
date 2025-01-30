@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT">
+	<aura:attribute name="eachOtherDeposit" type="Object" />
+	<aura:attribute name="OtherDepositIndex" type="String"/>
+</aura:event>
